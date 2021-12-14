@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         mImageViews = new ImageView[2];
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
         mImageViews[1] = (ImageView) findViewById(R.id.imageView2);
-
+        String imageBgColor = "#E1E1E1";
         mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
             float x1, x2, y1, y2, dx, dy;
 
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
 //                TextView debugText = findViewById(R.id.textView2);
 //                debugText.setText("onTouch");
-		        mImageViews[0].setBackgroundColor(Color.parseColor("#52D017"));
+		        mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 0;
 
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 TextView debugText = findViewById(R.id.textView);
 //                debugText.setText("onTouch");
-                mImageViews[1].setBackgroundColor(Color.parseColor("#52D017"));
+                mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 1;
 
@@ -269,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-
         // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
         String[] itemsZoom = new String[]{"100", "110", "125", "150", "200", "125"};
@@ -286,8 +285,7 @@ public class MainActivity extends AppCompatActivity {
             }  
  	        @Override
             public void onNothingSelected(AdapterView<?> parent) {}
-       });
-
+        });
 
         Spinner dropdownPage = findViewById(R.id.spinnerPage);
         ArrayList<String> arrayList = new ArrayList<>();
