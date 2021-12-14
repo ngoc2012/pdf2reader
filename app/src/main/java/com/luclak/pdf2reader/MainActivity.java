@@ -205,6 +205,10 @@ public class MainActivity extends AppCompatActivity {
                 mImageViews[1].setBackgroundColor(Color.parseColor("#52D017"));
                 mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 1;
+
+                // No document selected
+                if (mCurrentPages[currentDocument] == null) {return true;}
+                
                 String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
