@@ -257,19 +257,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Spinner dropdown = findViewById(R.id.spinnerDocument);
-        String[] items = new String[]{"1", "2"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, items);
-        dropdown.setAdapter(adapter);
-        currentDocument = Integer.parseInt(dropdown.getSelectedItem().toString()) - 1;
-        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
- 		        currentDocument = position;
-            }  
- 	        @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+//        Spinner dropdown = findViewById(R.id.spinnerDocument);
+//        String[] items = new String[]{"1", "2"};
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, items);
+//        dropdown.setAdapter(adapter);
+//        currentDocument = Integer.parseInt(dropdown.getSelectedItem().toString()) - 1;
+//        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+// 		        currentDocument = position;
+//            }
+// 	        @Override
+//            public void onNothingSelected(AdapterView<?> parent) {}
+//        });
 
         // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
@@ -413,6 +413,8 @@ public class MainActivity extends AppCompatActivity {
         renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
         debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
+        TextView textPage = findViewById(R.id.textViewPage);
+        textPage.setText(String.valueOf(documents[0].currentPage)+"/"+String.valueOf(documents[1].currentPage));
     }
 
     public void onBtnNextClick (View view) {
@@ -421,5 +423,7 @@ public class MainActivity extends AppCompatActivity {
         renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
         debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
+        TextView textPage = findViewById(R.id.textViewPage);
+        textPage.setText(String.valueOf(documents[0].currentPage)+"/"+String.valueOf(documents[1].currentPage));
     }
 }
