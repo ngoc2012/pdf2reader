@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
 
     private TextView debugText;
@@ -178,38 +177,33 @@ public class MainActivity extends AppCompatActivity {
         Spinner dropdown = findViewById(R.id.spinnerDocument);
         String[] items = new String[]{"1", "2"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, items);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
         currentDocument = Integer.parseInt(dropdown.getSelectedItem().toString()) - 1;
-//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//
-//                switch (position) {
-//                    case 0:
-//                        Toast.makeText(parent.getContext(), "Spinner item 1!", Toast.LENGTH_SHORT).show();
-//                        break;
-//                    case 1:
-//                        Toast.makeText(parent.getContext(), "Spinner item 2!", Toast.LENGTH_SHORT).show();
-//                        break;
-//                    case 2:
-//                        Toast.makeText(parent.getContext(), "Spinner item 3!", Toast.LENGTH_SHORT).show();
-//                        break;
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//                // sometimes you need nothing here
-//            }
-//        });
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+ 		currentDocument = position;              
+            }  
+ 	    @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+       });
 
 
         // Spinner
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
         String[] itemsZoom = new String[]{"100", "105", "110", "115", "120", "125"};
-        ArrayAdapter<String> adapterZoom = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, itemsZoom);
+        ArrayAdapter<String> adapterZoom = new ArrayAdapter<>(this, R.layout.spinner_item, itemsZoom);
         dropdownZoom.setAdapter(adapterZoom);
+	dropdownZoom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+ 		documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);              
+            }  
+ 	    @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+       });
+
 
         Spinner dropdownPage = findViewById(R.id.spinnerPage);
         ArrayList<String> arrayList = new ArrayList<>();
@@ -217,26 +211,35 @@ public class MainActivity extends AppCompatActivity {
             arrayList.add(String.valueOf(i));
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,                         android.R.layout.simple_spinner_item, arrayList);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, arrayList);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dropdownPage.setAdapter(arrayAdapter);
 
+
+
+
         Spinner dropdownSpeed = findViewById(R.id.spinnerSpeed);
         String[] itemsSpeed = new String[]{"1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4"};
-        ArrayAdapter<String> adapterSpeed = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, itemsSpeed);
+        ArrayAdapter<String> adapterSpeed = new ArrayAdapter<>(this, R.layout.spinner_item, itemsSpeed);
         dropdownSpeed.setAdapter(adapterSpeed);
+	dropdownSpeed.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+ 		documents[currentDocument].speed = Float.parseFloat(itemsSpeed[position]);              
+            } 
+	    @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
-//          positionPage.put("1", 100);
-//        positionPage.put("2", 100);
-//        speed.put("1", 1.0f);
-//        speed.put("2", 1.0f);
-//        currentPage.put("1", 9);
-//        currentPage.put("2", 3);
         documents = new document[2];
-        documents[0] = new document(0, 0,100, 0,1.0f);
-        documents[1] = new document(0, 0,100, 0,1.0f);
+        documents[0] = new document(8, 0,100, 0,1.0f);
+        documents[1] = new document(3, 0,100, 0,1.0f);
 
-        Map<String, PdfRenderer> mPdfRenderer = new HashMap<>();
+        // Initiate
+        mFileDescriptors = new ParcelFileDescriptor[2];
+        mPdfRenderers = new PdfRenderer[2];
+        mCurrentPages = new PdfRenderer.Page[2];
+        bitmaps = new Bitmap[2];
     }
 
     private void movePage (int iDoc, float dy) {
@@ -259,10 +262,10 @@ public class MainActivity extends AppCompatActivity {
         mImageViews[iDoc].setImageBitmap(bitmap1);
     }
 
-    private void renderPage (int iDoc, int iPage) {
+    private void renderPage (int iDoc) {
         TextView debugText = findViewById(R.id.textView);
 
-        mCurrentPages[iDoc] = mPdfRenderers[iDoc].openPage(iPage);
+        mCurrentPages[iDoc] = mPdfRenderers[iDoc].openPage(documents[iDoc].currentPage);
 //        debugText.setText("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
 
         bitmaps[iDoc] =  Bitmap.createBitmap(mCurrentPages[iDoc].getWidth(), mCurrentPages[iDoc].getHeight(), Bitmap.Config.ARGB_8888);
@@ -281,10 +284,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
+
         TextView debugText = findViewById(R.id.textView);
+        debugText.setText(context.getCacheDir().toString());
+
         File file = new File(context.getCacheDir(), FILENAME);
         if (!file.exists()) {
-//            debugText.setText("file" + FILENAME + " does not exists");
+            debugText.setText("file" + FILENAME + " does not exists");
 
             // the cache directory.
             InputStream asset = context.getAssets().open(FILENAME);
@@ -298,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
             output.close();
 
         } else {
-//            debugText.setText("file" + FILENAME + " exists");
+            debugText.setText("file" + FILENAME + " exists");
         }
 
         mFileDescriptors[iDoc] = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
@@ -306,24 +312,28 @@ public class MainActivity extends AppCompatActivity {
         if (mFileDescriptors[iDoc] != null) {
             mPdfRenderers[iDoc] = new PdfRenderer(mFileDescriptors[iDoc]);
             documents[iDoc].numberPage = mPdfRenderers[iDoc].getPageCount();
-            renderPage(iDoc, documents[iDoc].currentPage);
-            mPdfRenderers[iDoc].close();
+            renderPage(iDoc);
+            //mPdfRenderers[iDoc].close();
         }
-        mFileDescriptors[iDoc].close();
+        //mFileDescriptors[iDoc].close();
     }
 
     public void onBtnOpen (View view) throws IOException {
-        OpenFile(this, 1, "HuckFinn.pdf");
+        OpenFile(this, 0, "HuckFinn.pdf");
         OpenFile(this, 1, "HuckFinn_vn.pdf");
     }
 
     public void onBtnPrevClick (View view) {
+	documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage-1,0);
+	renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Prev");
+        debugText.setText("Prev"+ String.valueOf(documents[currentDocument].currentPage));
     }
 
     public void onBtnNextClick (View view) {
+	documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage+1,documents[currentDocument].numberPage-1);
+	renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Next");
+        debugText.setText("Next" + " " + String.valueOf(currentDocument)  + " " + String.valueOf(documents[currentDocument].currentPage));
     }
 }
