@@ -75,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
         // Hide app name bar default
         getSupportActionBar().hide();
 
+        // Initiate
+        mFileDescriptors = new ParcelFileDescriptor[2];
+        mPdfRenderers = new PdfRenderer[2];
+        mCurrentPages = new PdfRenderer.Page[2];
+        bitmaps = new Bitmap[2];
+
         // Pdf imageView
         mImageViews = new ImageView[2];
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
@@ -195,17 +201,21 @@ public class MainActivity extends AppCompatActivity {
        });
 
 
-        // Spinner
+        // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
-        String[] itemsZoom = new String[]{"100", "105", "110", "115", "120", "125"};
+        String[] itemsZoom = new String[]{"100", "110", "125", "150", "200", "125"};
         ArrayAdapter<String> adapterZoom = new ArrayAdapter<>(this, R.layout.spinner_item, itemsZoom);
         dropdownZoom.setAdapter(adapterZoom);
-	dropdownZoom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+	    dropdownZoom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
- 		documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);              
+ 		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
+// 		        if (mCurrentPages.length > 0) {
+//                    movePage (currentDocument, documents[currentDocument].positionPage);
+//                }
+
             }  
- 	    @Override
+ 	        @Override
             public void onNothingSelected(AdapterView<?> parent) {}
        });
 
@@ -219,9 +229,6 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, arrayList);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dropdownPage.setAdapter(arrayAdapter);
-
-
-
 
         Spinner dropdownSpeed = findViewById(R.id.spinnerSpeed);
         String[] itemsSpeed = new String[]{"1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4"};
@@ -240,11 +247,7 @@ public class MainActivity extends AppCompatActivity {
         documents[0] = new document(8, 0,100, 0,1.0f);
         documents[1] = new document(3, 0,100, 0,1.0f);
 
-        // Initiate
-        mFileDescriptors = new ParcelFileDescriptor[2];
-        mPdfRenderers = new PdfRenderer[2];
-        mCurrentPages = new PdfRenderer.Page[2];
-        bitmaps = new Bitmap[2];
+
     }
 
     private void movePage (int iDoc, float dy) {
