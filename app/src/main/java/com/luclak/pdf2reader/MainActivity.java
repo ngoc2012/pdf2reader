@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private PdfRenderer.Page[] mCurrentPages;
     private Bitmap[] bitmaps;
     private int currentDocument;
+    private int numberPage;
     JSONObject documentsJson;
 
     //    Alt + Shift + Insert
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         mCurrentPages = new PdfRenderer.Page[2];
         bitmaps = new Bitmap[2];
         documentsJson = new JSONObject();
+        numberPage = 1;
 //        File file = new File("pdf2reader.json");
 //        if (file.exists()) {
 //            readFromFile()
@@ -287,26 +289,37 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Spinner - Page
         Spinner dropdownPage = findViewById(R.id.spinnerPage);
-        ArrayList<String> arrayList = new ArrayList<>();
-        for (int i=0;i<100;i++) {
-            arrayList.add(String.valueOf(i));
-        }
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, arrayList);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        dropdownPage.setAdapter(arrayAdapter);
+//        ArrayList<String> arrayList = new ArrayList<>();
+//        for (int i=0;i<100;i++) {
+//            arrayList.add(String.valueOf(i));
+//        }
+//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, arrayList);
+//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        dropdownPage.setAdapter(arrayAdapter);
+        String[] itemsPage = new String[]{"1", "5", "10", "20", "50"};
+        ArrayAdapter<String> adapterPage = new ArrayAdapter<>(this, R.layout.spinner_item, itemsPage);
+        dropdownPage.setAdapter(adapterPage);
+        dropdownPage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                numberPage = Integer.parseInt(itemsPage[position]);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         Spinner dropdownSpeed = findViewById(R.id.spinnerSpeed);
         String[] itemsSpeed = new String[]{"1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4"};
         ArrayAdapter<String> adapterSpeed = new ArrayAdapter<>(this, R.layout.spinner_item, itemsSpeed);
         dropdownSpeed.setAdapter(adapterSpeed);
-	dropdownSpeed.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+	    dropdownSpeed.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
- 		documents[currentDocument].speed = Float.parseFloat(itemsSpeed[position]);              
+ 		        documents[currentDocument].speed = Float.parseFloat(itemsSpeed[position]);
             } 
-	    @Override
+	        @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
@@ -350,11 +363,6 @@ public class MainActivity extends AppCompatActivity {
 
         // close the page
         mCurrentPages[iDoc].close();
-
-//
-//        Bitmap bitmap1 = Bitmap.createBitmap(bitmap.get(document), startX, 0, (int) bitWidth, (int) documentHeight);
-//
-//        mImageView.setImageBitmap(bitmap1);
 
         movePage (iDoc, 0.0f);
     }
@@ -400,16 +408,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnPrevClick (View view) {
-	documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage-1,0);
-	renderPage(currentDocument);
+//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
+        documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
+        renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Prev"+ String.valueOf(documents[currentDocument].currentPage));
+        debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
     }
 
     public void onBtnNextClick (View view) {
-	documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage+1,documents[currentDocument].numberPage-1);
-	renderPage(currentDocument);
+//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
+        documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
+        renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Next" + " " + String.valueOf(currentDocument)  + " " + String.valueOf(documents[currentDocument].currentPage));
+        debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
     }
 }
