@@ -21,6 +21,8 @@ import android.widget.ArrayAdapter;
 import android.graphics.Rect;
 //import android.content.res.AssetManager;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private PdfRenderer.Page[] mCurrentPages;
     private Bitmap[] bitmaps;
     private int currentDocument;
+    JSONObject documentsJson;
 
     //    Alt + Shift + Insert
     private class document {
@@ -135,7 +138,11 @@ public class MainActivity extends AppCompatActivity {
         mPdfRenderers = new PdfRenderer[2];
         mCurrentPages = new PdfRenderer.Page[2];
         bitmaps = new Bitmap[2];
-
+        documentsJson = new JSONObject();
+//        File file = new File("pdf2reader.json");
+//        if (file.exists()) {
+//            readFromFile()
+//        }
         // Pdf imageView
         mImageViews = new ImageView[2];
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
@@ -208,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // No document selected
                 if (mCurrentPages[currentDocument] == null) {return true;}
-                
+
                 String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
@@ -260,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
             }  
  	        @Override
             public void onNothingSelected(AdapterView<?> parent) {}
-       });
+        });
 
 
         // Spinner - Zoom
@@ -337,7 +344,9 @@ public class MainActivity extends AppCompatActivity {
         mCurrentPages[iDoc] = mPdfRenderers[iDoc].openPage(documents[iDoc].currentPage);
 //        debugText.setText("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
 
-        bitmaps[iDoc] =  Bitmap.createBitmap(mCurrentPages[iDoc].getWidth(), mCurrentPages[iDoc].getHeight(), Bitmap.Config.ARGB_8888);
+        int factor = 4;
+        bitmaps[iDoc] =  Bitmap.createBitmap(mCurrentPages[iDoc].getWidth()*factor, mCurrentPages[iDoc].getHeight()*factor, Bitmap.Config.ARGB_8888);
+
         // The rectangle is represented by the coordinates of its 4 edges (left, top, right bottom)
         mCurrentPages[iDoc].render(bitmaps[iDoc], null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
