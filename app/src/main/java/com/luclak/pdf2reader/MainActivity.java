@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.content.Context;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,10 +21,14 @@ import android.widget.ArrayAdapter;
 import android.graphics.Rect;
 //import android.content.res.AssetManager;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +57,15 @@ public class MainActivity extends AppCompatActivity {
             this.positionPage=positionPage;
             this.speed=speed;
         }
+        public String getJson() {
+            return ("{\n" +
+                "currentPage:" + String.valueOf(currentPage) + "\n," +
+                "numberPage:" + String.valueOf(numberPage) + "\n," +
+                "zoom:" + String.valueOf(zoom) + "\n," +
+                "positionPage:" + String.valueOf(positionPage) + "\n," +
+                "speed:" + String.valueOf(speed) + "\n," +
+            "}");
+        }
     }
 
     private document[] documents;
@@ -65,6 +79,47 @@ public class MainActivity extends AppCompatActivity {
         Rect rItem = new Rect();
         item.getGlobalVisibleRect(rItem);
         return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
+    }
+
+    private void writeToFile(String data) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("pdf2reader.json", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    private String readFromFile() {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = this.openFileInput("pdf2reader.json");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
     }
 
     @Override
@@ -96,6 +151,10 @@ public class MainActivity extends AppCompatActivity {
 		        mImageViews[0].setBackgroundColor(Color.parseColor("#52D017"));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 0;
+
+                // No document selected
+                if (mCurrentPages[currentDocument] == null) {return true;}
+
                 String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
