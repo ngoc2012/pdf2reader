@@ -188,15 +188,14 @@ public class MainActivity extends AppCompatActivity {
         Spinner dropdown = findViewById(R.id.spinnerDocument);
         String[] items = new String[]{"1", "2"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, items);
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
         currentDocument = Integer.parseInt(dropdown.getSelectedItem().toString()) - 1;
         dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
- 		currentDocument = position;              
+ 		        currentDocument = position;
             }  
- 	    @Override
+ 	        @Override
             public void onNothingSelected(AdapterView<?> parent) {}
        });
 
@@ -210,9 +209,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
-// 		        if (mCurrentPages.length > 0) {
-//                    movePage (currentDocument, documents[currentDocument].positionPage);
-//                }
+ 		        if (mCurrentPages[currentDocument] != null) {
+                    movePage (currentDocument, documents[currentDocument].positionPage);
+                }
 
             }  
  	        @Override
@@ -246,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
         documents = new document[2];
         documents[0] = new document(8, 0,100, 0,1.0f);
         documents[1] = new document(3, 0,100, 0,1.0f);
-
 
     }
 
