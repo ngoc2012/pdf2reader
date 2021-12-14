@@ -2,6 +2,7 @@ package com.luclak.pdf2reader;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.content.Context;
 import android.graphics.Point;
@@ -86,7 +87,9 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
 //                TextView debugText = findViewById(R.id.textView2);
 //                debugText.setText("onTouch");
-
+		        mImageViews[0].setBackgroundColor(Color.parseColor("#52D017"));
+                mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
+                currentDocument = 0;
                 String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
@@ -134,7 +137,9 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 TextView debugText = findViewById(R.id.textView);
 //                debugText.setText("onTouch");
-
+                mImageViews[1].setBackgroundColor(Color.parseColor("#52D017"));
+                mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
+                currentDocument = 1;
                 String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
