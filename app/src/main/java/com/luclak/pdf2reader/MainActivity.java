@@ -126,6 +126,26 @@ public class MainActivity extends AppCompatActivity {
         return ret;
     }
 
+    private void previousPage () {
+//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
+        documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
+        renderPage(currentDocument);
+        TextView debugText = findViewById(R.id.textView);
+        debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
+        TextView textPage = findViewById(R.id.textViewPage);
+        textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+    }
+
+    private void nextPage () {
+//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
+        documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
+        renderPage(currentDocument);
+        TextView debugText = findViewById(R.id.textView);
+        debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
+        TextView textPage = findViewById(R.id.textViewPage);
+        textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
                 // No document selected
                 if (mCurrentPages[currentDocument] == null) {return true;}
 
-                String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
                         x1 = event.getX();
@@ -181,20 +200,18 @@ public class MainActivity extends AppCompatActivity {
                         // Use dx and dy to determine the direction of the move
                         if(Math.abs(dx) > Math.abs(dy)) {
                             if(dx>0)
-                                direction = "right";
+                                previousPage();
                             else
-                                direction = "left";
+                                nextPage();
+
                         } else {
-                            if(dy>0)
-                                direction = "down";
-                            else
-                                direction = "up";
+                            movePage (0, dy);
+                            movePage (1, dy);
                         }
 
 //                        debugText.setText("ACTION_UP: direction " + direction + ";" + String.valueOf(dx) + ";" + String.valueOf(dy));
 
-                        movePage (0, dy);
-                        movePage (1, dy);
+
                         break;
 
                     default:
@@ -218,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
                 // No document selected
                 if (mCurrentPages[currentDocument] == null) {return true;}
 
-                String direction;
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
                         x1 = event.getX();
@@ -235,19 +251,17 @@ public class MainActivity extends AppCompatActivity {
                         // Use dx and dy to determine the direction of the move
                         if(Math.abs(dx) > Math.abs(dy)) {
                             if(dx>0)
-                                direction = "right";
+                                previousPage();
                             else
-                                direction = "left";
+                                nextPage();
+
                         } else {
-                            if(dy>0)
-                                direction = "down";
-                            else
-                                direction = "up";
+                            movePage (1, dy);
                         }
 
 //                        debugText.setText("ACTION_UP: direction " + direction + ";" + String.valueOf(dx) + ";" + String.valueOf(dy));
 
-                        movePage (1, dy);
+
                         break;
 
                     default:
@@ -409,22 +423,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnPrevClick (View view) {
-//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
-        documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
-        renderPage(currentDocument);
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
-        TextView textPage = findViewById(R.id.textViewPage);
-        textPage.setText(String.valueOf(documents[0].currentPage)+"/"+String.valueOf(documents[1].currentPage));
+        previousPage();
     }
 
     public void onBtnNextClick (View view) {
-//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
-        documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
-        renderPage(currentDocument);
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
-        TextView textPage = findViewById(R.id.textViewPage);
-        textPage.setText(String.valueOf(documents[0].currentPage)+"/"+String.valueOf(documents[1].currentPage));
+        nextPage();
     }
 }
