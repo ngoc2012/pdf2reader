@@ -326,7 +326,8 @@ public class MainActivity extends AppCompatActivity {
         documents = new document[2];
         documents[0] = new document(8, 0,100, 0,1.0f);
         documents[1] = new document(3, 0,100, 0,1.0f);
-
+        TextView debugText = findViewById(R.id.textView);
+        debugText.setHeight(0);
     }
 
     private void movePage (int iDoc, float dy) {
