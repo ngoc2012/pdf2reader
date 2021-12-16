@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.content.Context;
 import android.graphics.Point;
+import android.os.Environment;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -49,21 +50,23 @@ public class MainActivity extends AppCompatActivity {
     private int numberPage;
     private boolean landMode;
     JSONObject documentsJson;
+    private String folder;
 
     //    Alt + Shift + Insert
     private class document {
+        public String fileName="";
         public int currentPage=0;
         public int numberPage=0;
         public int zoom=100;
         public int positionPage=0;
         public float speed=1.0f;
-        document(int currentPage, int numberPage, int zoom, int positionPage, float speed) {
-            this.currentPage=currentPage;
-            this.numberPage=numberPage;
-            this.zoom=zoom;
-            this.positionPage=positionPage;
-            this.speed=speed;
-        }
+//        document(int currentPage, int numberPage, int zoom, int positionPage, float speed) {
+//            this.currentPage=currentPage;
+//            this.numberPage=numberPage;
+//            this.zoom=zoom;
+//            this.positionPage=positionPage;
+//            this.speed=speed;
+//        }
         public String getJson() {
             return ("{\n" +
                 "currentPage:" + String.valueOf(currentPage) + "\n," +
@@ -72,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
                 "positionPage:" + String.valueOf(positionPage) + "\n," +
                 "speed:" + String.valueOf(speed) + "\n," +
             "}");
+        }
+        public String getString() {
+            return (String.valueOf(currentPage) + "," + String.valueOf(numberPage) + "," + String.valueOf(zoom) + "," + String.valueOf(positionPage) + "," + String.valueOf(speed));
         }
     }
 
@@ -88,9 +94,9 @@ public class MainActivity extends AppCompatActivity {
         return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
     }
 
-    private void writeToFile(String data) {
+    private void writeToFile(String data,String fileName) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("pdf2reader.json", Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(fileName, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
         }
@@ -99,12 +105,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String readFromFile() {
+    private String readFromFile(String fileName) {
 
         String ret = "";
 
         try {
-            InputStream inputStream = this.openFileInput("pdf2reader.json");
+            InputStream inputStream = this.openFileInput(fileName);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -138,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+
+        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName);
     }
 
     private void nextPage () {
@@ -149,11 +157,14 @@ public class MainActivity extends AppCompatActivity {
         debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+
+        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         // Hide app name bar default
@@ -170,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
 //        if (file.exists()) {
 //            readFromFile()
 //        }
-
         landMode = false;
 
         // Pdf imageView
@@ -346,8 +356,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         documents = new document[2];
-        documents[0] = new document(8, 0,100, 0,1.0f);
-        documents[1] = new document(3, 0,100, 0,1.0f);
+//        documents[0] = new document(0, 0,100, 0,1.0f);
+//        documents[1] = new document(0, 0,100, 0,1.0f);
+        documents[0] = new document();
+        documents[1] = new document();
         TextView debugText = findViewById(R.id.textView);
         debugText.setHeight(0);
     }
@@ -411,12 +423,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
 
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setText(context.getCacheDir().toString());
+//        File downloadFolder = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+//        downloadFolder.listFiles();
+//        downloadFolder.getPath();
+
+        //        readFromFile()
 
         File file = new File(context.getCacheDir(), FILENAME);
         if (!file.exists()) {
-            debugText.setText("file" + FILENAME + " does not exists");
+//            debugText.setText("file" + FILENAME + " does not exists");
 
             // the cache directory.
             InputStream asset = context.getAssets().open(FILENAME);
@@ -430,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
             output.close();
 
         } else {
-            debugText.setText("file" + FILENAME + " exists");
+//            debugText.setText("file" + FILENAME + " exists");
         }
 
         mFileDescriptors[iDoc] = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
@@ -440,6 +455,17 @@ public class MainActivity extends AppCompatActivity {
             documents[iDoc].numberPage = mPdfRenderers[iDoc].getPageCount();
             renderPage(iDoc);
             //mPdfRenderers[iDoc].close();
+            documents[iDoc].fileName = FILENAME;
+
+            Log.d("Opened ", FILENAME);
+
+            // Check for configuration file
+            String config = readFromFile(FILENAME.substring(0, FILENAME.length()-3) + "txt");
+            if (config == "") {
+                Log.d("config ", "No config file");
+            } else {
+                Log.d("config ", config);
+            }
         }
         //mFileDescriptors[iDoc].close();
     }
