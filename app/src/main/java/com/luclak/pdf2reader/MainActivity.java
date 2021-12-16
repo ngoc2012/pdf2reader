@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.content.Context;
 import android.graphics.Point;
-import android.os.Environment;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -21,8 +20,6 @@ import android.os.ParcelFileDescriptor;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.graphics.Rect;
-import android.widget.Toast;
-//import android.content.res.AssetManager;
 
 import org.json.JSONObject;
 
@@ -34,10 +31,7 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView debugText;
@@ -79,15 +73,18 @@ public class MainActivity extends AppCompatActivity {
         public String getString() {
             return (String.valueOf(currentPage) + "," + String.valueOf(numberPage) + "," + String.valueOf(zoom) + "," + String.valueOf(positionPage) + "," + String.valueOf(speed));
         }
+        public void getConfig(String config) {
+            String[] configs = config.split(",");
+            this.currentPage = Integer.parseInt(configs[0]);
+            this.numberPage = Integer.parseInt(configs[1]);
+            this.zoom = Integer.parseInt(configs[2]);
+            this.positionPage = Integer.parseInt(configs[3]);
+            this.speed = Float.parseFloat(configs[4]);
+        }
     }
 
     private document[] documents;
 
-    /**
-     * @param item  the view that received the drag event
-     * @param event the event from {@link android.view.View.OnDragListener#onDrag(View, DragEvent)}
-     * @return the coordinates of the touch on x and y axis relative to the screen
-     */
     public static Point getTouchPositionFromDragEvent(View item, DragEvent event) {
         Rect rItem = new Rect();
         item.getGlobalVisibleRect(rItem);
@@ -145,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName);
+        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     private void nextPage () {
@@ -158,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName);
+        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     @Override
@@ -375,20 +372,19 @@ public class MainActivity extends AppCompatActivity {
 
         documents[iDoc].positionPage = Math.min(Math.max(documents[iDoc].positionPage - (int) dy, 0), (int) ( documentImageHeight - mImageViews[iDoc].getHeight())* (int) bitWidth/mImageViews[iDoc].getWidth());
         Bitmap bitmap1 = Bitmap.createBitmap(bitmaps[iDoc], startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
-        Toast.makeText(this, String.valueOf(mImageViews[iDoc].getHeight()), Toast.LENGTH_SHORT).show();
         mImageViews[iDoc].setImageBitmap(bitmap1);
+
+        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-//            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
-        }
+//        // Checks the orientation of the screen
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+//        }
 
         if (mCurrentPages[0] != null) {
             renderPage(0);
@@ -398,8 +394,6 @@ public class MainActivity extends AppCompatActivity {
         if (mCurrentPages[1] != null) {
             renderPage(1);
         }
-
-//            movePage (1, documents[1].positionPage);
 
     }
 
@@ -453,7 +447,6 @@ public class MainActivity extends AppCompatActivity {
         if (mFileDescriptors[iDoc] != null) {
             mPdfRenderers[iDoc] = new PdfRenderer(mFileDescriptors[iDoc]);
             documents[iDoc].numberPage = mPdfRenderers[iDoc].getPageCount();
-            renderPage(iDoc);
             //mPdfRenderers[iDoc].close();
             documents[iDoc].fileName = FILENAME;
 
@@ -461,11 +454,10 @@ public class MainActivity extends AppCompatActivity {
 
             // Check for configuration file
             String config = readFromFile(FILENAME.substring(0, FILENAME.length()-3) + "txt");
-            if (config == "") {
-                Log.d("config ", "No config file");
-            } else {
-                Log.d("config ", config);
-            }
+            if (config != "")
+                documents[iDoc].getConfig(config);
+
+            renderPage(iDoc);
         }
         //mFileDescriptors[iDoc].close();
     }
