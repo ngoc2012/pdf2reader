@@ -2,6 +2,7 @@ package com.luclak.pdf2reader;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.ParcelFileDescriptor;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.graphics.Rect;
+import android.widget.Toast;
 //import android.content.res.AssetManager;
 
 import org.json.JSONObject;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap[] bitmaps;
     private int currentDocument;
     private int numberPage;
+    private boolean landMode;
     JSONObject documentsJson;
 
     //    Alt + Shift + Insert
@@ -129,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
     private void previousPage () {
 //        Spinner dropdownPage = findViewById(R.id.spinnerPage);
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
+        documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
         debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
@@ -139,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     private void nextPage () {
 //        Spinner dropdownPage = findViewById(R.id.spinnerPage);
         documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
+        documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
         TextView debugText = findViewById(R.id.textView);
         debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
@@ -165,6 +170,9 @@ public class MainActivity extends AppCompatActivity {
 //        if (file.exists()) {
 //            readFromFile()
 //        }
+
+        landMode = false;
+
         // Pdf imageView
         mImageViews = new ImageView[2];
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
@@ -345,23 +353,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void movePage (int iDoc, float dy) {
+//        int orientation = this.getResources().getConfiguration().orientation;
+//        if (orientation == Configuration.ORIENTATION_PORTRAIT) {}
 
         float bitWidth = bitmaps[iDoc].getWidth()*100.0f/documents[iDoc].zoom;
         int startX = (int) (bitmaps[iDoc].getWidth()*0.5 - (float) bitWidth*0.5);
         float documentHeight = (float) mImageViews[iDoc].getHeight() / (float) mImageViews[iDoc].getWidth() * bitWidth;
         float documentImageHeight = bitmaps[iDoc].getHeight() * (float) mImageViews[iDoc].getWidth() / bitWidth;
-//        debugText.setText(String.valueOf(mImageView.getHeight()) + " " + String.valueOf(bitmap.get(document).getHeight()) );
-
-//        debugText.setText(String.valueOf(mImageView.getHeight()) + " " + String.valueOf(bitmap.get(document).getHeight()) + " " + String.valueOf((int) documentHeight));
-//        debugText.setText(String.valueOf(bitWidth) + " " + String.valueOf(startX) + " " + String.valueOf(bitmap.get(document).getWidth()) + " " + String.valueOf(zoom.get(document)));
 
         documents[iDoc].positionPage = Math.min(Math.max(documents[iDoc].positionPage - (int) dy, 0), (int) ( documentImageHeight - mImageViews[iDoc].getHeight())* (int) bitWidth/mImageViews[iDoc].getWidth());
-
         Bitmap bitmap1 = Bitmap.createBitmap(bitmaps[iDoc], startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
-
-        TextView debugText = findViewById(R.id.textView);
-//        debugText.setText("positionPage: direction " + positionPage.get(document) + ";" + String.valueOf(dy) + ";" + String.valueOf(mImageView.getHeight()) + ";" + String.valueOf(documentImageHeight) + ";" + String.valueOf(bitmap.get(document).getHeight()));
+        Toast.makeText(this, String.valueOf(mImageViews[iDoc].getHeight()), Toast.LENGTH_SHORT).show();
         mImageViews[iDoc].setImageBitmap(bitmap1);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+//            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+        }
+
+        if (mCurrentPages[0] != null) {
+            renderPage(0);
+//            movePage (0, documents[0].positionPage);
+        }
+
+        if (mCurrentPages[1] != null) {
+            renderPage(1);
+        }
+
+//            movePage (1, documents[1].positionPage);
+
     }
 
     private void renderPage (int iDoc) {
