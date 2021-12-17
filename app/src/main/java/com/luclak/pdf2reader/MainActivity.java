@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
 
                         // Use dx and dy to determine the direction of the move
                         if(Math.abs(dx) > Math.abs(dy)) {
-                            if(dx>0)
+                            if(dx>10)
                                 previousPage();
-                            else
+                            else if (dx < -10)
                                 nextPage();
 
                         } else {
@@ -162,9 +162,9 @@ public class MainActivity extends AppCompatActivity {
 
                         // Use dx and dy to determine the direction of the move
                         if(Math.abs(dx) > Math.abs(dy)) {
-                            if(dx>0)
+                            if(dx > 10)
                                 previousPage();
-                            else
+                            else if (dx < -10)
                                 nextPage();
 
                         } else {
@@ -313,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
             String config = fileIO.readFromFile(this, FILENAME.substring(0, FILENAME.length()-3) + "txt");
             if (config != "")
                 documents[iDoc].getConfig(config);
-	    	documents[iDoc].currentPage = min(documents[iDoc].numberPage-1, documents[iDoc].currentPage);
+	    	documents[iDoc].currentPage = Math.min(documents[iDoc].numberPage-1, documents[iDoc].currentPage);
 
             renderPage(iDoc);
         }
