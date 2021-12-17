@@ -180,20 +180,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        Spinner dropdown = findViewById(R.id.spinnerDocument);
-//        String[] items = new String[]{"1", "2"};
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, items);
-//        dropdown.setAdapter(adapter);
-//        currentDocument = Integer.parseInt(dropdown.getSelectedItem().toString()) - 1;
-//        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-// 		        currentDocument = position;
-//            }
-// 	        @Override
-//            public void onNothingSelected(AdapterView<?> parent) {}
-//        });
-
         // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
         String[] itemsZoom = new String[]{"100", "110", "125", "150", "200", "125"};
@@ -327,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
             String config = fileIO.readFromFile(this, FILENAME.substring(0, FILENAME.length()-3) + "txt");
             if (config != "")
                 documents[iDoc].getConfig(config);
+	    	documents[iDoc].currentPage = min(documents[iDoc].numberPage-1, documents[iDoc].currentPage);
 
             renderPage(iDoc);
         }
