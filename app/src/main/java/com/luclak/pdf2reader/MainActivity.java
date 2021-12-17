@@ -32,7 +32,6 @@ import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView debugText;
     private ImageView[] mImageViews;
     private ParcelFileDescriptor[] mFileDescriptors;
     private PdfRenderer[] mPdfRenderers;
@@ -54,8 +53,6 @@ public class MainActivity extends AppCompatActivity {
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
         documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Page "+ String.valueOf(documents[currentDocument].currentPage));
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
@@ -66,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
         documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
         documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setText("Page " + String.valueOf(documents[currentDocument].currentPage));
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
@@ -100,8 +95,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-//                TextView debugText = findViewById(R.id.textView2);
-//                debugText.setText("onTouch");
 		        mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 0;
@@ -113,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                     case(MotionEvent.ACTION_DOWN):
                         x1 = event.getX();
                         y1 = event.getY();
-//                        debugText.setText("ACTION_DOWN " + String.valueOf(x1) + ";" + String.valueOf(y1));
                         break;
 
                     case(MotionEvent.ACTION_UP):
@@ -134,9 +126,6 @@ public class MainActivity extends AppCompatActivity {
                             movePage (1, dy);
                         }
 
-//                        debugText.setText("ACTION_UP: direction " + direction + ";" + String.valueOf(dx) + ";" + String.valueOf(dy));
-
-
                         break;
 
                     default:
@@ -151,8 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                TextView debugText = findViewById(R.id.textView);
-//                debugText.setText("onTouch");
+
                 mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 1;
@@ -164,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                     case(MotionEvent.ACTION_DOWN):
                         x1 = event.getX();
                         y1 = event.getY();
-//                        debugText.setText("ACTION_DOWN " + String.valueOf(x1) + ";" + String.valueOf(y1));
                         break;
 
                     case(MotionEvent.ACTION_UP):
@@ -183,9 +170,6 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             movePage (1, dy);
                         }
-
-//                        debugText.setText("ACTION_UP: direction " + direction + ";" + String.valueOf(dx) + ";" + String.valueOf(dy));
-
 
                         break;
 
@@ -230,13 +214,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Spinner - Page
         Spinner dropdownPage = findViewById(R.id.spinnerPage);
-//        ArrayList<String> arrayList = new ArrayList<>();
-//        for (int i=0;i<100;i++) {
-//            arrayList.add(String.valueOf(i));
-//        }
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, arrayList);
-//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        dropdownPage.setAdapter(arrayAdapter);
         String[] itemsPage = new String[]{"1", "5", "10", "20", "50"};
         ArrayAdapter<String> adapterPage = new ArrayAdapter<>(this, R.layout.spinner_item, itemsPage);
         dropdownPage.setAdapter(adapterPage);
@@ -265,8 +242,7 @@ public class MainActivity extends AppCompatActivity {
         documents = new document[2];
         documents[0] = new document();
         documents[1] = new document();
-        TextView debugText = findViewById(R.id.textView);
-        debugText.setHeight(0);
+
     }
 
     private void movePage (int iDoc, float dy) {
@@ -288,28 +264,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
 //        // Checks the orientation of the screen
 //        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 //        }
-
         if (mCurrentPages[0] != null) {
             renderPage(0);
 //            movePage (0, documents[0].positionPage);
         }
-
         if (mCurrentPages[1] != null) {
             renderPage(1);
         }
-
     }
 
     private void renderPage (int iDoc) {
-        TextView debugText = findViewById(R.id.textView);
 
         mCurrentPages[iDoc] = mPdfRenderers[iDoc].openPage(documents[iDoc].currentPage);
-//        debugText.setText("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
+//       ("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
 
         int factor = 4;
         bitmaps[iDoc] =  Bitmap.createBitmap(mCurrentPages[iDoc].getWidth()*factor, mCurrentPages[iDoc].getHeight()*factor, Bitmap.Config.ARGB_8888);
@@ -325,11 +296,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
 
-        //        readFromFile()
 
         File file = new File(context.getCacheDir(), FILENAME);
         if (!file.exists()) {
-//            debugText.setText("file" + FILENAME + " does not exists");
 
             // the cache directory.
             InputStream asset = context.getAssets().open(FILENAME);
@@ -342,8 +311,6 @@ public class MainActivity extends AppCompatActivity {
             asset.close();
             output.close();
 
-        } else {
-//            debugText.setText("file" + FILENAME + " exists");
         }
 
         mFileDescriptors[iDoc] = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
