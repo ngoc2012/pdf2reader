@@ -25,16 +25,10 @@ import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.graphics.Rect;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,9 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap[] bitmaps;
     private int currentDocument;
     private int numberPage;
-    private boolean landMode;
-    JSONObject documentsJson;
-    private String folder;
 
     //  Vertical selection:  Alt + Shift + Insert
     private document[] documents;
@@ -59,49 +50,7 @@ public class MainActivity extends AppCompatActivity {
         return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
     }
 
-//    private void writeToFile(String data,String fileName) {
-//        try {
-//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(fileName, Context.MODE_PRIVATE));
-//            outputStreamWriter.write(data);
-//            outputStreamWriter.close();
-//        }
-//        catch (IOException e) {
-//            Log.e("Exception", "File write failed: " + e.toString());
-//        }
-//    }
-//
-//    private String readFromFile(String fileName) {
-//
-//        String ret = "";
-//
-//        try {
-//            InputStream inputStream = this.openFileInput(fileName);
-//
-//            if ( inputStream != null ) {
-//                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-//                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//                String receiveString = "";
-//                StringBuilder stringBuilder = new StringBuilder();
-//
-//                while ( (receiveString = bufferedReader.readLine()) != null ) {
-//                    stringBuilder.append(receiveString);
-//                }
-//
-//                inputStream.close();
-//                ret = stringBuilder.toString();
-//            }
-//        }
-//        catch (FileNotFoundException e) {
-//            Log.e("login activity", "File not found: " + e.toString());
-//        } catch (IOException e) {
-//            Log.e("login activity", "Can not read file: " + e.toString());
-//        }
-//
-//        return ret;
-//    }
-
     private void previousPage () {
-//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
         documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
@@ -114,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextPage () {
-//        Spinner dropdownPage = findViewById(R.id.spinnerPage);
         documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
         documents[currentDocument].positionPage = 0;
         renderPage(currentDocument);
@@ -140,13 +88,7 @@ public class MainActivity extends AppCompatActivity {
         mPdfRenderers = new PdfRenderer[2];
         mCurrentPages = new PdfRenderer.Page[2];
         bitmaps = new Bitmap[2];
-        documentsJson = new JSONObject();
         numberPage = 1;
-//        File file = new File("pdf2reader.json");
-//        if (file.exists()) {
-//            readFromFile()
-//        }
-        landMode = false;
 
         // Pdf imageView
         mImageViews = new ImageView[2];
@@ -321,8 +263,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         documents = new document[2];
-//        documents[0] = new document(0, 0,100, 0,1.0f);
-//        documents[1] = new document(0, 0,100, 0,1.0f);
         documents[0] = new document();
         documents[1] = new document();
         TextView debugText = findViewById(R.id.textView);
@@ -441,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Log.d("Folder ", "not found");
             }
-            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
+//            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
         }
 
 

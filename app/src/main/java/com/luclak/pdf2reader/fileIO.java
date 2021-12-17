@@ -9,13 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-//import java.io.InputStreamReader;
-//import java.io.FileNotFoundException;
-//import java.io.IOException;
-//import java.io.InputStream;
-//import java.io.FileOutputStream;
-//import java.io.BufferedReader;
-//import java.io.File;
 
 public class fileIO {
     public static void writeToFile(Context context, String data,String fileName) {
