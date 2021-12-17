@@ -59,46 +59,46 @@ public class MainActivity extends AppCompatActivity {
         return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
     }
 
-    private void writeToFile(String data,String fileName) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(fileName, Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    private String readFromFile(String fileName) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = this.openFileInput(fileName);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
+//    private void writeToFile(String data,String fileName) {
+//        try {
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(fileName, Context.MODE_PRIVATE));
+//            outputStreamWriter.write(data);
+//            outputStreamWriter.close();
+//        }
+//        catch (IOException e) {
+//            Log.e("Exception", "File write failed: " + e.toString());
+//        }
+//    }
+//
+//    private String readFromFile(String fileName) {
+//
+//        String ret = "";
+//
+//        try {
+//            InputStream inputStream = this.openFileInput(fileName);
+//
+//            if ( inputStream != null ) {
+//                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+//                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+//                String receiveString = "";
+//                StringBuilder stringBuilder = new StringBuilder();
+//
+//                while ( (receiveString = bufferedReader.readLine()) != null ) {
+//                    stringBuilder.append(receiveString);
+//                }
+//
+//                inputStream.close();
+//                ret = stringBuilder.toString();
+//            }
+//        }
+//        catch (FileNotFoundException e) {
+//            Log.e("login activity", "File not found: " + e.toString());
+//        } catch (IOException e) {
+//            Log.e("login activity", "Can not read file: " + e.toString());
+//        }
+//
+//        return ret;
+//    }
 
     private void previousPage () {
 //        Spinner dropdownPage = findViewById(R.id.spinnerPage);
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     private void nextPage () {
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     @Override
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap1 = Bitmap.createBitmap(bitmaps[iDoc], startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
         mImageViews[iDoc].setImageBitmap(bitmap1);
 
-        writeToFile(documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
     }
 
     @Override
@@ -417,7 +417,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Opened ", FILENAME);
 
             // Check for configuration file
-            String config = readFromFile(FILENAME.substring(0, FILENAME.length()-3) + "txt");
+            String config = fileIO.readFromFile(this, FILENAME.substring(0, FILENAME.length()-3) + "txt");
             if (config != "")
                 documents[iDoc].getConfig(config);
 
