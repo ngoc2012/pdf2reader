@@ -50,43 +50,7 @@ public class MainActivity extends AppCompatActivity {
     JSONObject documentsJson;
     private String folder;
 
-    //    Alt + Shift + Insert
-    private class document {
-        public String fileName="";
-        public int currentPage=0;
-        public int numberPage=0;
-        public int zoom=100;
-        public int positionPage=0;
-        public float speed=1.0f;
-//        document(int currentPage, int numberPage, int zoom, int positionPage, float speed) {
-//            this.currentPage=currentPage;
-//            this.numberPage=numberPage;
-//            this.zoom=zoom;
-//            this.positionPage=positionPage;
-//            this.speed=speed;
-//        }
-        public String getJson() {
-            return ("{\n" +
-                "currentPage:" + String.valueOf(currentPage) + "\n," +
-                "numberPage:" + String.valueOf(numberPage) + "\n," +
-                "zoom:" + String.valueOf(zoom) + "\n," +
-                "positionPage:" + String.valueOf(positionPage) + "\n," +
-                "speed:" + String.valueOf(speed) + "\n," +
-            "}");
-        }
-        public String getString() {
-            return (String.valueOf(currentPage) + "," + String.valueOf(numberPage) + "," + String.valueOf(zoom) + "," + String.valueOf(positionPage) + "," + String.valueOf(speed));
-        }
-        public void getConfig(String config) {
-            String[] configs = config.split(",");
-            this.currentPage = Integer.parseInt(configs[0]);
-            this.numberPage = Integer.parseInt(configs[1]);
-            this.zoom = Integer.parseInt(configs[2]);
-            this.positionPage = Integer.parseInt(configs[3]);
-            this.speed = Float.parseFloat(configs[4]);
-        }
-    }
-
+    //  Vertical selection:  Alt + Shift + Insert
     private document[] documents;
 
     public static Point getTouchPositionFromDragEvent(View item, DragEvent event) {
@@ -421,8 +385,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
 
-
-
         //        readFromFile()
 
         File file = new File(context.getCacheDir(), FILENAME);
@@ -479,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Log.d("Folder ", "not found");
             }
+            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
         }
 
 
