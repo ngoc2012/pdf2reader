@@ -282,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
 
-
         File file = new File(context.getCacheDir(), FILENAME);
         if (!file.exists()) {
 
@@ -321,24 +320,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnOpen (View view) throws IOException {
-        String[] requiredPermissions = { Manifest.permission.READ_EXTERNAL_STORAGE };
-        ActivityCompat.requestPermissions(this, requiredPermissions, 0);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File[] directoryListing = downloadFolder.listFiles();
-            Log.d("Folder ", downloadFolder.getPath());
-            if (directoryListing != null) {
-                for (File f : directoryListing) {
-                    Log.d("File ", f.getName());
-                }
-            } else {
-                Log.d("Folder ", "not found");
-            }
-//            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
-        }
-
-
+        getFiles.getFiles(this);
         OpenFile(this, 0, "HuckFinn.pdf");
         OpenFile(this, 1, "HuckFinn_vn.pdf");
     }
