@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-		        mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
+		mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 0;
 
@@ -125,34 +125,16 @@ public class MainActivity extends AppCompatActivity {
                 // No document selected
                 if (documents[currentDocument].mCurrentPages == null) {return true;}
 
-                switch(event.getAction()) {
-                    case(MotionEvent.ACTION_DOWN):
-                        x1 = event.getX();
-                        y1 = event.getY();
-                        break;
+ 		mImageViews0.getMotion(event);
+                if (mImageViews0.dx > 0)
+                    previousPage();
+                if (mImageViews0.dx < 0)
+                    nextPage();
+                if (Math.abs(mImageViews0.dy) > 0) 
+                    documents[1].movePage (mImageViews0.dy);
+                
 
-                    case(MotionEvent.ACTION_UP):
-                        x2 = event.getX();
-                        y2 = event.getY();
-                        dx = x2-x1;
-                        dy = y2-y1;
-
-                        // Use dx and dy to determine the direction of the move
-                        if(Math.abs(dx) > Math.abs(dy)) {
-                            if(dx > 10)
-                                previousPage();
-                            else if (dx < -10)
-                                nextPage();
-
-                        } else {
-                            documents[1].movePage (dy);
-                        }
-
-                        break;
-
-                    default:
-                }
-                // The view needs to return true on first ACTION_DOWN event, only then it will receive successive touch events.
+                mImageViews0.resetDxDy();
                 return true;
             }
         });
