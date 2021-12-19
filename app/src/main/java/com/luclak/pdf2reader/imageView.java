@@ -1,11 +1,6 @@
 package com.luclak.pdf2reader;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
 
 public class imageView {
     private float x1, y1, x2, y2;

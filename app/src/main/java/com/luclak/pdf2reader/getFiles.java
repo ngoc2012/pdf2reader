@@ -2,11 +2,9 @@ package com.luclak.pdf2reader;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 
 import androidx.core.app.ActivityCompat;
 

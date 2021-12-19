@@ -1,34 +1,21 @@
 package com.luclak.pdf2reader;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.content.Context;
-import android.graphics.Point;
-import android.os.Environment;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.ImageView;
-import android.graphics.pdf.PdfRenderer;
-import android.graphics.Bitmap;
-import android.os.ParcelFileDescriptor;
+
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
-import android.graphics.Rect;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,12 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     //  Vertical selection:  Alt + Shift + Insert
     private document[] documents;
-
-//    public static Point getTouchPositionFromDragEvent(View item, DragEvent event) {
-//        Rect rItem = new Rect();
-//        item.getGlobalVisibleRect(rItem);
-//        return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
-//    }
 
     private void previousPage () {
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
