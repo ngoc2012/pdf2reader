@@ -33,21 +33,17 @@ import java.io.FileOutputStream;
 public class MainActivity extends AppCompatActivity {
 
     private ImageView[] mImageViews;
-//    private ParcelFileDescriptor[] mFileDescriptors;
-//    private PdfRenderer[] mPdfRenderers;
-//    private PdfRenderer.Page[] mCurrentPages;
-//    private Bitmap[] bitmaps;
     private int currentDocument;
     private int numberPage;
 
     //  Vertical selection:  Alt + Shift + Insert
     private document[] documents;
 
-    public static Point getTouchPositionFromDragEvent(View item, DragEvent event) {
-        Rect rItem = new Rect();
-        item.getGlobalVisibleRect(rItem);
-        return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
-    }
+//    public static Point getTouchPositionFromDragEvent(View item, DragEvent event) {
+//        Rect rItem = new Rect();
+//        item.getGlobalVisibleRect(rItem);
+//        return new Point(rItem.left + Math.round(event.getX()), rItem.top + Math.round(event.getY()));
+//    }
 
     private void previousPage () {
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
@@ -79,19 +75,17 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         // Initiate
-//        mFileDescriptors = new ParcelFileDescriptor[2];
-//        mPdfRenderers = new PdfRenderer[2];
-//        mCurrentPages = new PdfRenderer.Page[2];
-//        bitmaps = new Bitmap[2];
         numberPage = 1;
 
         // Pdf imageView
         mImageViews = new ImageView[2];
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
         mImageViews[1] = (ImageView) findViewById(R.id.imageView2);
+        imageView mImageViews0 = new imageView();
+        imageView mImageViews1 = new imageView();
         String imageBgColor = "#E1E1E1";
         mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
-            float x1, x2, y1, y2, dx, dy;
+//            float x1, x2, y1, y2, dx, dy;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -102,35 +96,18 @@ public class MainActivity extends AppCompatActivity {
                 // No document selected
                 if (documents[currentDocument].mCurrentPages == null) {return true;}
 
-                switch(event.getAction()) {
-                    case(MotionEvent.ACTION_DOWN):
-                        x1 = event.getX();
-                        y1 = event.getY();
-                        break;
-
-                    case(MotionEvent.ACTION_UP):
-                        x2 = event.getX();
-                        y2 = event.getY();
-                        dx = x2-x1;
-                        dy = y2-y1;
-
-                        // Use dx and dy to determine the direction of the move
-                        if(Math.abs(dx) > Math.abs(dy)) {
-                            if(dx>10)
-                                previousPage();
-                            else if (dx < -10)
-                                nextPage();
-
-                        } else {
-                            documents[0].movePage (dy);
-                            documents[1].movePage (dy);
-                        }
-
-                        break;
-
-                    default:
+                mImageViews0.getMotion(event);
+                if (mImageViews0.dx > 0)
+                    previousPage();
+                if (mImageViews0.dx < 0)
+                    nextPage();
+                if (Math.abs(mImageViews0.dy) > 0) {
+                    documents[0].movePage (mImageViews0.dy);
+                    documents[1].movePage (mImageViews0.dy);
                 }
-                // The view needs to return true on first ACTION_DOWN event, only then it will receive successive touch events.
+
+                mImageViews0.resetDxDy();
+
                 return true;
             }
         });
@@ -253,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnOpen (View view) throws IOException {
         getFiles.getFiles(this);
         for (File f : getFiles.fileList)
-            Log.d("File ", f.getAbsolutePath());
+            Log.d("pdf2reader ", f.getAbsolutePath());
         documents[0].OpenFile("HuckFinn.pdf");
         documents[1].OpenFile("HuckFinn_vn.pdf");
     }
@@ -265,4 +242,16 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnNextClick (View view) {
         nextPage();
     }
+
+//    String value="Hello world";
+//    Intent i = new Intent(CurrentActivity.this, NewActivity.class);
+//i.putExtra("key",value);
+//    startActivity(i);
+//    Then in the new Activity, retrieve those values:
+//
+//    Bundle extras = getIntent().getExtras();
+//if (extras != null) {
+//        String value = extras.getString("key");
+//        //The key argument here must match that used in the other activity
+//    }
 }
