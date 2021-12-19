@@ -16,17 +16,14 @@ import java.util.List;
 
 public class getFiles {
 
-    private static List<File> fileList = new ArrayList<File>();
+    public static List<File> fileList = new ArrayList<File>();
 
     private static void getFilesList(File[] directoryListing) {
         if (directoryListing != null) {
             for (File f : directoryListing) {
-//                Log.d("File ", f.getAbsolutePath());
                 if (f.isFile()) {
-//                    Log.d("File ", "is file");
                     fileList.add(f);
                 } else {
-//                    Log.d("File ", "is folder");
                     getFilesList(f.listFiles());
                 }
             }
@@ -41,11 +38,9 @@ public class getFiles {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File[] directoryListing = downloadFolder.listFiles();
-            Log.d("Folder ", downloadFolder.getPath());
             getFilesList(directoryListing);
-            for (File f : fileList) {
-                Log.d("File ", f.getAbsolutePath());
-            }
+//            for (File f : fileList)
+//                Log.d("File ", f.getAbsolutePath());
 //            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
         }
     }

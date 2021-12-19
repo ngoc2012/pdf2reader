@@ -33,10 +33,10 @@ import java.io.FileOutputStream;
 public class MainActivity extends AppCompatActivity {
 
     private ImageView[] mImageViews;
-    private ParcelFileDescriptor[] mFileDescriptors;
-    private PdfRenderer[] mPdfRenderers;
-    private PdfRenderer.Page[] mCurrentPages;
-    private Bitmap[] bitmaps;
+//    private ParcelFileDescriptor[] mFileDescriptors;
+//    private PdfRenderer[] mPdfRenderers;
+//    private PdfRenderer.Page[] mCurrentPages;
+//    private Bitmap[] bitmaps;
     private int currentDocument;
     private int numberPage;
 
@@ -79,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         // Initiate
-        mFileDescriptors = new ParcelFileDescriptor[2];
-        mPdfRenderers = new PdfRenderer[2];
-        mCurrentPages = new PdfRenderer.Page[2];
-        bitmaps = new Bitmap[2];
+//        mFileDescriptors = new ParcelFileDescriptor[2];
+//        mPdfRenderers = new PdfRenderer[2];
+//        mCurrentPages = new PdfRenderer.Page[2];
+//        bitmaps = new Bitmap[2];
         numberPage = 1;
 
         // Pdf imageView
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 currentDocument = 0;
 
                 // No document selected
-                if (mCurrentPages[currentDocument] == null) {return true;}
+                if (documents[currentDocument].mCurrentPages == null) {return true;}
 
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 currentDocument = 1;
 
                 // No document selected
-                if (mCurrentPages[currentDocument] == null) {return true;}
+                if (documents[currentDocument].mCurrentPages == null) {return true;}
 
                 switch(event.getAction()) {
                     case(MotionEvent.ACTION_DOWN):
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
- 		        if (mCurrentPages[currentDocument] != null) {
+ 		        if (documents[currentDocument].mCurrentPages != null) {
                     movePage (currentDocument, documents[currentDocument].positionPage);
                 }
 
@@ -235,13 +235,13 @@ public class MainActivity extends AppCompatActivity {
 //        int orientation = this.getResources().getConfiguration().orientation;
 //        if (orientation == Configuration.ORIENTATION_PORTRAIT) {}
 
-        float bitWidth = bitmaps[iDoc].getWidth()*100.0f/documents[iDoc].zoom;
-        int startX = (int) (bitmaps[iDoc].getWidth()*0.5 - (float) bitWidth*0.5);
+        float bitWidth = documents[iDoc].bitmaps.getWidth()*100.0f/documents[iDoc].zoom;
+        int startX = (int) (documents[iDoc].bitmaps.getWidth()*0.5 - (float) bitWidth*0.5);
         float documentHeight = (float) mImageViews[iDoc].getHeight() / (float) mImageViews[iDoc].getWidth() * bitWidth;
-        float documentImageHeight = bitmaps[iDoc].getHeight() * (float) mImageViews[iDoc].getWidth() / bitWidth;
+        float documentImageHeight = documents[iDoc].bitmaps.getHeight() * (float) mImageViews[iDoc].getWidth() / bitWidth;
 
         documents[iDoc].positionPage = Math.min(Math.max(documents[iDoc].positionPage - (int) dy, 0), (int) ( documentImageHeight - mImageViews[iDoc].getHeight())* (int) bitWidth/mImageViews[iDoc].getWidth());
-        Bitmap bitmap1 = Bitmap.createBitmap(bitmaps[iDoc], startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
+        Bitmap bitmap1 = Bitmap.createBitmap(documents[iDoc].bitmaps, startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
         mImageViews[iDoc].setImageBitmap(bitmap1);
 
         fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
@@ -254,28 +254,28 @@ public class MainActivity extends AppCompatActivity {
 //        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 //        }
-        if (mCurrentPages[0] != null) {
+        if (documents[0].mCurrentPages != null) {
             renderPage(0);
 //            movePage (0, documents[0].positionPage);
         }
-        if (mCurrentPages[1] != null) {
+        if (documents[1].mCurrentPages != null) {
             renderPage(1);
         }
     }
 
     private void renderPage (int iDoc) {
 
-        mCurrentPages[iDoc] = mPdfRenderers[iDoc].openPage(documents[iDoc].currentPage);
+        documents[iDoc].mCurrentPages = documents[iDoc].mPdfRenderers.openPage(documents[iDoc].currentPage);
 //       ("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
 
         int factor = 4;
-        bitmaps[iDoc] =  Bitmap.createBitmap(mCurrentPages[iDoc].getWidth()*factor, mCurrentPages[iDoc].getHeight()*factor, Bitmap.Config.ARGB_8888);
+        documents[iDoc].bitmaps =  Bitmap.createBitmap(documents[iDoc].mCurrentPages.getWidth()*factor, documents[iDoc].mCurrentPages.getHeight()*factor, Bitmap.Config.ARGB_8888);
 
         // The rectangle is represented by the coordinates of its 4 edges (left, top, right bottom)
-        mCurrentPages[iDoc].render(bitmaps[iDoc], null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        documents[iDoc].mCurrentPages.render(documents[iDoc].bitmaps, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
         // close the page
-        mCurrentPages[iDoc].close();
+        documents[iDoc].mCurrentPages.close();
 
         movePage (iDoc, 0.0f);
     }
@@ -298,12 +298,12 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        mFileDescriptors[iDoc] = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        documents[iDoc].mFileDescriptors = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         // This is the PdfRenderer we use to render the PDF.
-        if (mFileDescriptors[iDoc] != null) {
-            mPdfRenderers[iDoc] = new PdfRenderer(mFileDescriptors[iDoc]);
-            documents[iDoc].numberPage = mPdfRenderers[iDoc].getPageCount();
-            //mPdfRenderers[iDoc].close();
+        if (documents[iDoc].mFileDescriptors != null) {
+            documents[iDoc].mPdfRenderers = new PdfRenderer(documents[iDoc].mFileDescriptors);
+            documents[iDoc].numberPage = documents[iDoc].mPdfRenderers.getPageCount();
+            //documents[iDoc].mPdfRenderers.close();
             documents[iDoc].fileName = FILENAME;
 
             Log.d("Opened ", FILENAME);
@@ -316,11 +316,13 @@ public class MainActivity extends AppCompatActivity {
 
             renderPage(iDoc);
         }
-        //mFileDescriptors[iDoc].close();
+        //documents[iDoc].mFileDescriptors.close();
     }
 
     public void onBtnOpen (View view) throws IOException {
         getFiles.getFiles(this);
+        for (File f : getFiles.fileList)
+            Log.d("File ", f.getAbsolutePath());
         OpenFile(this, 0, "HuckFinn.pdf");
         OpenFile(this, 1, "HuckFinn_vn.pdf");
     }

@@ -1,5 +1,10 @@
 package com.luclak.pdf2reader;
 
+import android.graphics.Bitmap;
+import android.graphics.pdf.PdfRenderer;
+import android.os.ParcelFileDescriptor;
+import android.widget.ImageView;
+
 public class document {
     public String fileName="";
     public int currentPage=0;
@@ -7,6 +12,13 @@ public class document {
     public int zoom=100;
     public int positionPage=0;
     public float speed=1.0f;
+
+    public ImageView mImageViews;
+    public ParcelFileDescriptor mFileDescriptors;
+    public PdfRenderer mPdfRenderers;
+    public PdfRenderer.Page mCurrentPages;
+    public Bitmap bitmaps;
+
     //        document(int currentPage, int numberPage, int zoom, int positionPage, float speed) {
 //        this.currentPage=currentPage;
 //        this.numberPage=numberPage;
