@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private void previousPage () {
         documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
         documents[currentDocument].positionPage = 0;
-        renderPage(currentDocument);
+        documents[currentDocument].renderPage();
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private void nextPage () {
         documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
         documents[currentDocument].positionPage = 0;
-        renderPage(currentDocument);
+        documents[currentDocument].renderPage();
         TextView textPage = findViewById(R.id.textViewPage);
         textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
                                 nextPage();
 
                         } else {
-                            movePage (0, dy);
-                            movePage (1, dy);
+                            documents[0].movePage (dy);
+                            documents[1].movePage (dy);
                         }
 
                         break;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                                 nextPage();
 
                         } else {
-                            movePage (1, dy);
+                            documents[1].movePage (dy);
                         }
 
                         break;
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
  		        if (documents[currentDocument].mCurrentPages != null) {
-                    movePage (currentDocument, documents[currentDocument].positionPage);
+                    documents[currentDocument].movePage (documents[currentDocument].positionPage);
                 }
 
             }  
@@ -228,23 +228,10 @@ public class MainActivity extends AppCompatActivity {
         documents = new document[2];
         documents[0] = new document();
         documents[1] = new document();
-
-    }
-
-    private void movePage (int iDoc, float dy) {
-//        int orientation = this.getResources().getConfiguration().orientation;
-//        if (orientation == Configuration.ORIENTATION_PORTRAIT) {}
-
-        float bitWidth = documents[iDoc].bitmaps.getWidth()*100.0f/documents[iDoc].zoom;
-        int startX = (int) (documents[iDoc].bitmaps.getWidth()*0.5 - (float) bitWidth*0.5);
-        float documentHeight = (float) mImageViews[iDoc].getHeight() / (float) mImageViews[iDoc].getWidth() * bitWidth;
-        float documentImageHeight = documents[iDoc].bitmaps.getHeight() * (float) mImageViews[iDoc].getWidth() / bitWidth;
-
-        documents[iDoc].positionPage = Math.min(Math.max(documents[iDoc].positionPage - (int) dy, 0), (int) ( documentImageHeight - mImageViews[iDoc].getHeight())* (int) bitWidth/mImageViews[iDoc].getWidth());
-        Bitmap bitmap1 = Bitmap.createBitmap(documents[iDoc].bitmaps, startX, documents[iDoc].positionPage, (int) bitWidth, (int) documentHeight);
-        mImageViews[iDoc].setImageBitmap(bitmap1);
-
-        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+        documents[0].context = this;
+        documents[1].context = this;
+        documents[0].mImageViews = (ImageView) findViewById(R.id.imageView);
+        documents[1].mImageViews = (ImageView) findViewById(R.id.imageView2);
     }
 
     @Override
@@ -255,76 +242,20 @@ public class MainActivity extends AppCompatActivity {
 //        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 //        }
         if (documents[0].mCurrentPages != null) {
-            renderPage(0);
+            documents[0].renderPage();
 //            movePage (0, documents[0].positionPage);
         }
         if (documents[1].mCurrentPages != null) {
-            renderPage(1);
+            documents[1].renderPage();
         }
-    }
-
-    private void renderPage (int iDoc) {
-
-        documents[iDoc].mCurrentPages = documents[iDoc].mPdfRenderers.openPage(documents[iDoc].currentPage);
-//       ("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
-
-        int factor = 4;
-        documents[iDoc].bitmaps =  Bitmap.createBitmap(documents[iDoc].mCurrentPages.getWidth()*factor, documents[iDoc].mCurrentPages.getHeight()*factor, Bitmap.Config.ARGB_8888);
-
-        // The rectangle is represented by the coordinates of its 4 edges (left, top, right bottom)
-        documents[iDoc].mCurrentPages.render(documents[iDoc].bitmaps, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-        // close the page
-        documents[iDoc].mCurrentPages.close();
-
-        movePage (iDoc, 0.0f);
-    }
-
-    private void OpenFile (Context context, int iDoc, String FILENAME) throws IOException {
-
-        File file = new File(context.getCacheDir(), FILENAME);
-        if (!file.exists()) {
-
-            // the cache directory.
-            InputStream asset = context.getAssets().open(FILENAME);
-            FileOutputStream output = new FileOutputStream(file);
-            final byte[] buffer = new byte[1024];
-            int size;
-            while ((size = asset.read(buffer)) != -1) {
-                output.write(buffer, 0, size);
-            }
-            asset.close();
-            output.close();
-
-        }
-
-        documents[iDoc].mFileDescriptors = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        // This is the PdfRenderer we use to render the PDF.
-        if (documents[iDoc].mFileDescriptors != null) {
-            documents[iDoc].mPdfRenderers = new PdfRenderer(documents[iDoc].mFileDescriptors);
-            documents[iDoc].numberPage = documents[iDoc].mPdfRenderers.getPageCount();
-            //documents[iDoc].mPdfRenderers.close();
-            documents[iDoc].fileName = FILENAME;
-
-            Log.d("Opened ", FILENAME);
-
-            // Check for configuration file
-            String config = fileIO.readFromFile(this, FILENAME.substring(0, FILENAME.length()-3) + "txt");
-            if (config != "")
-                documents[iDoc].getConfig(config);
-	    	documents[iDoc].currentPage = Math.min(documents[iDoc].numberPage-1, documents[iDoc].currentPage);
-
-            renderPage(iDoc);
-        }
-        //documents[iDoc].mFileDescriptors.close();
     }
 
     public void onBtnOpen (View view) throws IOException {
         getFiles.getFiles(this);
         for (File f : getFiles.fileList)
             Log.d("File ", f.getAbsolutePath());
-        OpenFile(this, 0, "HuckFinn.pdf");
-        OpenFile(this, 1, "HuckFinn_vn.pdf");
+        documents[0].OpenFile("HuckFinn.pdf");
+        documents[1].OpenFile("HuckFinn_vn.pdf");
     }
 
     public void onBtnPrevClick (View view) {
