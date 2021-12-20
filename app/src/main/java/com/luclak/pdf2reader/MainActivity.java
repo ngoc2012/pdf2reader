@@ -1,12 +1,15 @@
 package com.luclak.pdf2reader;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -66,11 +69,10 @@ public class MainActivity extends AppCompatActivity {
         imageView mImageViews1 = new imageView();
         String imageBgColor = "#E1E1E1";
         mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
-//            float x1, x2, y1, y2, dx, dy;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-		mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
+		        mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
                 currentDocument = 0;
 
@@ -84,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
                     nextPage();
                 if (Math.abs(mImageViews0.dy) > 0) {
                     documents[0].movePage (mImageViews0.dy);
-                    documents[1].movePage (mImageViews0.dy);
+                    if (documents[1].mCurrentPages == null)
+                        documents[1].movePage (mImageViews0.dy);
                 }
 
                 mImageViews0.resetDxDy();
@@ -94,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mImageViews[1].setOnTouchListener(new View.OnTouchListener() {
-            float x1, x2, y1, y2, dx, dy;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -172,6 +174,28 @@ public class MainActivity extends AppCompatActivity {
         documents[1].context = this;
         documents[0].mImageViews = (ImageView) findViewById(R.id.imageView);
         documents[1].mImageViews = (ImageView) findViewById(R.id.imageView2);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            currentDocument = extras.getInt("currentDocument");
+
+            ViewTreeObserver vto = documents[0].mImageViews.getViewTreeObserver();
+            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                public boolean onPreDraw() {
+//                    Log.i("pdf2reader main ", String.valueOf(documents[0].mImageViews.getWidth()) + " ");
+                    try {
+                        documents[currentDocument].OpenFile(extras.getString("folder"), extras.getString("fileName"));
+//                        documents[1].OpenFile(extras.getString("folder"), extras.getString("fileName"));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return true;
+                }
+            });
+
+
+        }
+
     }
 
     @Override
@@ -191,11 +215,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnOpen (View view) throws IOException {
-        getFiles.getFiles(this);
-        for (File f : getFiles.fileList)
-            Log.d("pdf2reader ", f.getAbsolutePath());
-        documents[0].OpenFile("HuckFinn.pdf");
-        documents[1].OpenFile("HuckFinn_vn.pdf");
+
+        Intent intentMain = new Intent(MainActivity.this ,
+                BrowserActivity.class);
+        intentMain.putExtra("currentDocument",currentDocument);
+        MainActivity.this.startActivity(intentMain);
+        Log.i("pdf2reader "," Main layout ");
+//        documents[0].OpenFile("HuckFinn.pdf");
+//        documents[1].OpenFile("HuckFinn_vn.pdf");
     }
 
     public void onBtnPrevClick (View view) {
@@ -206,15 +233,4 @@ public class MainActivity extends AppCompatActivity {
         nextPage();
     }
 
-//    String value="Hello world";
-//    Intent i = new Intent(CurrentActivity.this, NewActivity.class);
-//i.putExtra("key",value);
-//    startActivity(i);
-//    Then in the new Activity, retrieve those values:
-//
-//    Bundle extras = getIntent().getExtras();
-//if (extras != null) {
-//        String value = extras.getString("key");
-//        //The key argument here must match that used in the other activity
-//    }
 }

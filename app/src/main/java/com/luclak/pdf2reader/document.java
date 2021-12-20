@@ -60,8 +60,9 @@ public class document {
         int startX = (int) (this.bitmaps.getWidth()*0.5 - (float) bitWidth*0.5);
         float documentHeight = (float) this.mImageViews.getHeight() / (float) this.mImageViews.getWidth() * bitWidth;
         float documentImageHeight = this.bitmaps.getHeight() * (float) this.mImageViews.getWidth() / bitWidth;
-
+        Log.i("pdf2reader movePage ", String.valueOf(this.mImageViews.getWidth()) + " ");
         this.positionPage = Math.min(Math.max(this.positionPage - (int) dy, 0), (int) ( documentImageHeight - this.mImageViews.getHeight())* (int) bitWidth/this.mImageViews.getWidth());
+
         Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, (int) documentHeight);
         this.mImageViews.setImageBitmap(bitmap1);
 
@@ -86,9 +87,9 @@ public class document {
         this.movePage(0.0f);
     }
 
-    public void OpenFile (String FILENAME) throws IOException {
-
-        File file = new File(context.getCacheDir(), FILENAME);
+    public void OpenFile (String folder, String FILENAME) throws IOException {
+//        Log.d("pdf2reader OpenFile ", folder + FILENAME);
+        File file = new File(folder, FILENAME);
         if (!file.exists()) {
 
             // the cache directory.
@@ -114,11 +115,11 @@ public class document {
 
             Log.d("Opened ", FILENAME);
 
-            // Check for configuration file
-            String config = fileIO.readFromFile(context, FILENAME.substring(0, FILENAME.length()-3) + "txt");
-            if (config != "")
-                this.getConfig(config);
-            this.currentPage = Math.min(this.numberPage-1, this.currentPage);
+//            // Check for configuration file
+//            String config = fileIO.readFromFile(context, FILENAME.substring(0, FILENAME.length()-3) + "txt");
+//            if (config != "")
+//                this.getConfig(config);
+//            this.currentPage = Math.min(this.numberPage-1, this.currentPage);
 
             renderPage();
         }
