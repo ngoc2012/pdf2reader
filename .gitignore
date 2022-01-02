@@ -1,3 +1,7 @@
+*.swp
+*.swm
+*.un~
+*.java~
 *.iml
 .gradle
 /local.properties
