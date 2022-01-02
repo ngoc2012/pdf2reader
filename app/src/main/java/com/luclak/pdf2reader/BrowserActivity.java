@@ -18,13 +18,15 @@ public class BrowserActivity extends AppCompatActivity {
     private int currentDocument;
 
     public void goBack(File f) {
-        Intent intentApp = new Intent(BrowserActivity.this,
-                MainActivity.class);
-        intentApp.putExtra("fileName", f.getName());
-        intentApp.putExtra("folder", f.getParent());
-        intentApp.putExtra("currentDocument", currentDocument);
+        String param = fileIO.readFromFile(getApplication().getApplicationContext(), getApplicationInfo().dataDir + "/files/param.txt");
+        String[] params = param.split(",");
+        String txt = "0," + f.getAbsolutePath() + "," + params[2];
+        if (params[0].equalsIgnoreCase("1"))
+            txt = "1," + params[1] + "," + f.getAbsolutePath();
+        Log.i("pdf2reader BrowserActivity goBack", txt);
+        fileIO.writeToFile(getApplication().getApplicationContext(), txt, "param.txt");
+        Intent intentApp = new Intent(BrowserActivity.this, MainActivity.class);
         BrowserActivity.this.startActivity(intentApp);
-        Log.i("pdf2reader ",f.getAbsolutePath());
 
     }
 
@@ -58,11 +60,6 @@ public class BrowserActivity extends AppCompatActivity {
                 }
             });
             linearLayout.addView(textView);
-        }
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            currentDocument = extras.getInt("currentDocument");
-            //The key argument here must match that used in the other activity
         }
     }
 

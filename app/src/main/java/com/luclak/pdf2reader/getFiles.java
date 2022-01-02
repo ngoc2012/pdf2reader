@@ -16,17 +16,29 @@ public class getFiles {
 
     public static List<File> fileList = new ArrayList<File>();
 
+
+    private static String getExtension(String name) {
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(lastIndexOf + 1);
+    }
+
     private static void getFilesList(File[] directoryListing) {
         if (directoryListing != null) {
             for (File f : directoryListing) {
                 if (f.isFile()) {
-                    fileList.add(f);
+                    Log.i("pdf2reader getFiles ", f.getAbsolutePath() + ":" + getExtension(f.getAbsolutePath()));
+                    if (getExtension(f.getAbsolutePath()).equalsIgnoreCase("pdf")) {
+                        fileList.add(f);
+                    }
                 } else {
                     getFilesList(f.listFiles());
                 }
             }
         } else {
-            Log.d("Folder ", "not found");
+            Log.d("pdf2reader getFiles ", "Folder not found");
         }
     }
     public static void getFiles(Activity activity) {

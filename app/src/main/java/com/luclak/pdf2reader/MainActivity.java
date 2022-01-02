@@ -16,6 +16,7 @@ import android.widget.ImageView;
 
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
+import android.os.Environment;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView[] mImageViews;
     private int currentDocument;
     private int numberPage;
+    private boolean notLoaded;
+
+    private void setCurrentDocument(int value) {this.currentDocument=value;}
+    private int getCurrentDocument() {return this.currentDocument;}
 
     //  Vertical selection:  Alt + Shift + Insert
     private document[] documents;
@@ -66,15 +71,15 @@ public class MainActivity extends AppCompatActivity {
         mImageViews[0] = (ImageView) findViewById(R.id.imageView);
         mImageViews[1] = (ImageView) findViewById(R.id.imageView2);
         imageView mImageViews0 = new imageView();
-        imageView mImageViews1 = new imageView();
         String imageBgColor = "#E1E1E1";
         mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-		        mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
+                setCurrentDocument(0);
+//                Log.i("pdf2reader main mImageViews[0].setOnTouchListener currentDocument", Integer.toString(currentDocument));
+                mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
-                currentDocument = 0;
 
                 // No document selected
                 if (documents[currentDocument].mCurrentPages == null) {return true;}
@@ -100,22 +105,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
+                setCurrentDocument(1);
+//                Log.i("pdf2reader main mImageViews[1].setOnTouchListener currentDocument", Integer.toString(currentDocument));
                 mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
-                currentDocument = 1;
 
                 // No document selected
                 if (documents[currentDocument].mCurrentPages == null) {return true;}
 
- 		mImageViews0.getMotion(event);
+                mImageViews0.getMotion(event);
                 if (mImageViews0.dx > 0)
                     previousPage();
                 if (mImageViews0.dx < 0)
                     nextPage();
                 if (Math.abs(mImageViews0.dy) > 0) 
                     documents[1].movePage (mImageViews0.dy);
-                
 
                 mImageViews0.resetDxDy();
                 return true;
@@ -175,27 +179,37 @@ public class MainActivity extends AppCompatActivity {
         documents[0].mImageViews = (ImageView) findViewById(R.id.imageView);
         documents[1].mImageViews = (ImageView) findViewById(R.id.imageView2);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            currentDocument = extras.getInt("currentDocument");
+        String param = fileIO.readFromFile(getApplication().getApplicationContext(), getApplicationInfo().dataDir + "/files/param.txt");
+//        Log.i("pdf2reader param ", "++++" + getApplicationInfo().dataDir + "++++");
+        Log.i("pdf2reader param ", "++++" + param + "++++");
+        if (param == "")
+            fileIO.writeToFile(getApplication().getApplicationContext(), "0,x,x", "param.txt");
 
-            ViewTreeObserver vto = documents[0].mImageViews.getViewTreeObserver();
-            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                public boolean onPreDraw() {
-//                    Log.i("pdf2reader main ", String.valueOf(documents[0].mImageViews.getWidth()) + " ");
+        notLoaded = true;
+
+        ViewTreeObserver vto = documents[0].mImageViews.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                if (notLoaded) {
+                    Log.i("pdf2reader MainActivity onPreDraw", "xxxxxxxxxxxxxxx onPreDrawListenner xxxxxxxxxxxxxx");
                     try {
-                        documents[currentDocument].OpenFile(extras.getString("folder"), extras.getString("fileName"));
-//                        documents[1].OpenFile(extras.getString("folder"), extras.getString("fileName"));
+                        String[] params = param.split(",");
+                        if (!params[1].equalsIgnoreCase("x")) {
+    //                        Log.i("pdf2reader params[1] ", "++++" + params[1] + "++++");
+                            documents[0].OpenFile(params[1]);
+                        }
+                        if (!params[2].equalsIgnoreCase("x")) {
+    //                        Log.i("pdf2reader params[2] ", "++++" + params[2] + "++++");
+                            documents[1].OpenFile(params[2]);
+                        }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    return true;
                 }
-            });
-
-
-        }
-
+                notLoaded = false;
+                return true;
+            }
+        });
     }
 
     @Override
@@ -205,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
 //        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 //        }
+        Log.i("pdf2reader MainActivity onConfigurationChanged", "Something changed");
         if (documents[0].mCurrentPages != null) {
             documents[0].renderPage();
 //            movePage (0, documents[0].positionPage);
@@ -216,13 +231,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnOpen (View view) throws IOException {
 
-        Intent intentMain = new Intent(MainActivity.this ,
-                BrowserActivity.class);
-        intentMain.putExtra("currentDocument",currentDocument);
+        String param = fileIO.readFromFile(getApplication().getApplicationContext(), getApplicationInfo().dataDir + "/files/param.txt");
+        fileIO.writeToFile(getApplication().getApplicationContext(), Integer.toString(currentDocument) + param.substring(1, param.length()), "param.txt");
+        Intent intentMain = new Intent(MainActivity.this, BrowserActivity.class);
         MainActivity.this.startActivity(intentMain);
-        Log.i("pdf2reader "," Main layout ");
-//        documents[0].OpenFile("HuckFinn.pdf");
-//        documents[1].OpenFile("HuckFinn_vn.pdf");
     }
 
     public void onBtnPrevClick (View view) {
