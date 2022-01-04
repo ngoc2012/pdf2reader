@@ -29,7 +29,7 @@ public class getFiles {
         if (directoryListing != null) {
             for (File f : directoryListing) {
                 if (f.isFile()) {
-                    Log.i("pdf2reader getFiles ", f.getAbsolutePath() + ":" + getExtension(f.getAbsolutePath()));
+//                    Log.i("pdf2reader getFiles ", f.getAbsolutePath() + ":" + getExtension(f.getAbsolutePath()));
                     if (getExtension(f.getAbsolutePath()).equalsIgnoreCase("pdf")) {
                         fileList.add(f);
                     }

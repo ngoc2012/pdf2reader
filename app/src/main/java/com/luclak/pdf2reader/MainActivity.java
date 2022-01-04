@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     nextPage();
                 if (Math.abs(mImageViews0.dy) > 0) {
                     documents[0].movePage (mImageViews0.dy);
-                    if (documents[1].mCurrentPages == null)
+                    if (documents[1].mCurrentPages != null)
                         documents[1].movePage (mImageViews0.dy);
                 }
 
@@ -136,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
  		        if (documents[currentDocument].mCurrentPages != null) {
-                    documents[currentDocument].movePage (documents[currentDocument].positionPage);
+//                    documents[currentDocument].movePage (documents[currentDocument].positionPage);
+                    documents[currentDocument].renderPage();
                 }
 
             }  
@@ -220,10 +221,10 @@ public class MainActivity extends AppCompatActivity {
 //        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 //        }
         Log.i("pdf2reader MainActivity onConfigurationChanged", "Something changed");
-        if (documents[0].mCurrentPages != null) {
-            documents[0].renderPage();
+//        if (documents[0].mCurrentPages != null) {
+//            documents[0].renderPage();
 //            movePage (0, documents[0].positionPage);
-        }
+//        }
         if (documents[1].mCurrentPages != null) {
             documents[1].renderPage();
         }

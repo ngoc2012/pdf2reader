@@ -15,6 +15,7 @@ import java.io.InputStream;
 
 public class document {
     public String fileName="";
+    public String shortFileName="";
     public int currentPage=0;
     public int numberPage=0;
     public int zoom=100;
@@ -49,26 +50,43 @@ public class document {
         return (String.valueOf(currentPage) + "," + String.valueOf(numberPage) + "," + String.valueOf(zoom) + "," + String.valueOf(positionPage) + "," + String.valueOf(speed));
     }
 
-    public void getConfig(String config) {
-        String[] configs = config.split(",");
-        this.currentPage = Integer.parseInt(configs[0]);
-        this.numberPage = Integer.parseInt(configs[1]);
-        this.zoom = Integer.parseInt(configs[2]);
-        this.positionPage = Integer.parseInt(configs[3]);
-        this.speed = Float.parseFloat(configs[4]);
+    public void getConfig() {
+        // Check for configuration file
+        String configFile = this.shortFileName.substring(0, this.shortFileName.length()-3) + "txt";
+        // /data/user/0/com.luclak.pdf2reader/files/book.txt
+        String config = fileIO.readFromFile(context, context.getApplicationInfo().dataDir + "/files/" + configFile);
+        // Log.i("pdf2reader param ", "++++" + context.getApplicationInfo().dataDir + "/files/" + configFile + "++++");
+        if (config != "") {
+            String[] configs = config.split(",");
+            this.currentPage = Integer.parseInt(configs[0]);
+            this.numberPage = Integer.parseInt(configs[1]);
+            this.zoom = Integer.parseInt(configs[2]);
+            this.positionPage = Integer.parseInt(configs[3]);
+            this.speed = Float.parseFloat(configs[4]);
+        } else {
+            fileIO.writeToFile(context, "", configFile);
+        }
     }
 
     public void movePage (float dy) {
         float bitWidth = this.bitmaps.getWidth()*100.0f/this.zoom;
         int startX = (int) (this.bitmaps.getWidth()*0.5 - (float) bitWidth*0.5);
-        float documentHeight = (float) this.mImageViews.getHeight() / (float) this.mImageViews.getWidth() * bitWidth;
-        float documentImageHeight = this.bitmaps.getHeight() * (float) this.mImageViews.getWidth() / bitWidth;
-        //Log.i("pdf2reader document movePage ", String.valueOf(this.mImageViews.getWidth()) + " ");
-        Log.i("pdf2reader document movePage ", String.valueOf(speed) + " " +  String.valueOf((int) dy) + " " +  String.valueOf((int) (dy*speed)));
-//        this.positionPage = Math.min(Math.max(this.positionPage - (int) dy, 0), (int) ( documentImageHeight - this.mImageViews.getHeight())* (int) bitWidth/this.mImageViews.getWidth());
-        this.positionPage = Math.min(Math.max(this.positionPage - ((int) (dy*speed)), 0), (int) ( documentImageHeight - this.mImageViews.getHeight())* (int) bitWidth/this.mImageViews.getWidth());
 
-        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, (int) documentHeight);
+//        // Height maximal of the document
+//        float documentHeight = (float) this.mImageViews.getHeight() / (float) this.mImageViews.getWidth() * bitWidth;
+//
+//        float documentImageHeight = this.bitmaps.getHeight() * (float) this.mImageViews.getWidth() / bitWidth;
+//        //Log.i("pdf2reader document movePage ", String.valueOf(this.mImageViews.getWidth()) + " ");
+//
+//        Log.i("pdf2reader document movePage ", String.valueOf(speed) + " " +  String.valueOf((int) dy) + " " +  String.valueOf((int) (dy*speed)) + " " + String.valueOf(this.positionPage));
+//
+//        this.positionPage = Math.min(Math.max(this.positionPage - ((int) (dy*speed)), 0), (int) ( documentImageHeight - this.mImageViews.getHeight())* (int) bitWidth/this.mImageViews.getWidth());
+//
+//        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, (int) documentHeight);
+        this.positionPage = Math.min(this.positionPage - ((int) (dy*speed)), this.bitmaps.getHeight() - 100);
+        int hmax = (int) (this.mImageViews.getHeight() * bitWidth / this.mImageViews.getWidth());
+        Log.i("pdf2reader document movePage ", String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
+        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, Math.min( this.bitmaps.getHeight() - this.positionPage, hmax));
         this.mImageViews.setImageBitmap(bitmap1);
         fileIO.writeToFile(context, this.getString(),this.fileName.substring(0, this.fileName.length()-3) + "txt");
         
@@ -84,7 +102,7 @@ public class document {
         this.mCurrentPages.render(this.bitmaps, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         // close the page
         this.mCurrentPages.close();
-        this.movePage(positionPage);
+        this.movePage(0.0f);
     }
 
     public void OpenFile (String FILENAME) throws IOException {
@@ -95,15 +113,15 @@ public class document {
         String[] folders = Arrays.copyOfRange(fileNames, 0, fileNames.length-1);
         String folder = String.join("/", folders) + "/";
 
-        String filename = fileNames[fileNames.length-1];
+        this.shortFileName = fileNames[fileNames.length-1];
         // Log.i("pdf2reader document OpenFile ", folder + ":" + filename);
 
-        File file = new File(folder, filename);
+        File file = new File(folder, this.shortFileName);
         if (!file.exists()) {
             Log.i("pdf2reader document OpenFile ", " File not found");
 
             // the cache directory.
-            InputStream asset = context.openFileInput(filename);
+            InputStream asset = context.openFileInput(this.shortFileName);
             FileOutputStream output = new FileOutputStream(file);
             final byte[] buffer = new byte[1024];
             int size;
@@ -125,16 +143,7 @@ public class document {
 
             Log.d("Opened ", FILENAME);
 
-            // Check for configuration file
-
-            String configFile = filename.substring(0, filename.length()-3) + "txt";
-            // /data/user/0/com.luclak.pdf2reader/files/book.txt
-            String config = fileIO.readFromFile(context, context.getApplicationInfo().dataDir + "/files/" + configFile);
-            // Log.i("pdf2reader param ", "++++" + context.getApplicationInfo().dataDir + "/files/" + configFile + "++++");
-            if (config != "")
-                this.getConfig(config);
-            else
-                fileIO.writeToFile(context, "", configFile);
+            this.getConfig();
 
             this.currentPage = Math.min(this.numberPage-1, this.currentPage);
 
