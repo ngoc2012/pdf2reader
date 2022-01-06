@@ -36,7 +36,7 @@ public class BrowserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_browser);
 
         // Hide app name bar default
-//        getSupportActionBar().hide();
+        getSupportActionBar().hide();
 
         getFiles.getFiles(this);
 
