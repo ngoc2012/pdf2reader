@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
-
+import android.os.Build;
 import androidx.core.app.ActivityCompat;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class getFiles {
         if (directoryListing != null) {
             for (File f : directoryListing) {
                 if (f.isFile()) {
-//                    Log.i("pdf2reader getFiles ", f.getAbsolutePath() + ":" + getExtension(f.getAbsolutePath()));
+                    Log.i("pdf2reader getFiles ", f.getAbsolutePath() + ":" + getExtension(f.getAbsolutePath()));
                     if (getExtension(f.getAbsolutePath()).equalsIgnoreCase("pdf")) {
                         fileList.add(f);
                     }
@@ -41,17 +41,17 @@ public class getFiles {
             Log.d("pdf2reader getFiles ", "Folder not found");
         }
     }
+
     public static void getFiles(Activity activity) {
-        String[] requiredPermissions = { Manifest.permission.READ_EXTERNAL_STORAGE };
+
+        String[] requiredPermissions = { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(activity, requiredPermissions, 0);
+//        Log.i("pdf2reader getFiles ", Environment.DIRECTORY_DOWNLOADS);
 
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File[] directoryListing = downloadFolder.listFiles();
             getFilesList(directoryListing);
-//            for (File f : fileList)
-//                Log.d("File ", f.getAbsolutePath());
-//            folder = downloadFolder.getPath(); // /storage/emulated/0/Download
         }
     }
 }

@@ -66,66 +66,6 @@ public class MainActivity extends AppCompatActivity {
         // Initiate
         numberPage = 1;
 
-        // Pdf imageView
-        mImageViews = new ImageView[2];
-        mImageViews[0] = (ImageView) findViewById(R.id.imageView);
-        mImageViews[1] = (ImageView) findViewById(R.id.imageView2);
-        imageView mImageViews0 = new imageView();
-        String imageBgColor = "#E1E1E1";
-        mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                setCurrentDocument(0);
-//                Log.i("pdf2reader main mImageViews[0].setOnTouchListener currentDocument", Integer.toString(currentDocument));
-                mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
-                mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
-
-                // No document selected
-                if (documents[currentDocument].mCurrentPages == null) {return true;}
-
-                mImageViews0.getMotion(event);
-                if (mImageViews0.dx > 0)
-                    previousPage();
-                if (mImageViews0.dx < 0)
-                    nextPage();
-                if (Math.abs(mImageViews0.dy) > 0) {
-                    documents[0].movePage (mImageViews0.dy);
-                    if (documents[1].mCurrentPages != null)
-                        documents[1].movePage (mImageViews0.dy);
-                }
-
-                mImageViews0.resetDxDy();
-
-                return true;
-            }
-        });
-
-        mImageViews[1].setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                setCurrentDocument(1);
-//                Log.i("pdf2reader main mImageViews[1].setOnTouchListener currentDocument", Integer.toString(currentDocument));
-                mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
-                mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
-
-                // No document selected
-                if (documents[currentDocument].mCurrentPages == null) {return true;}
-
-                mImageViews0.getMotion(event);
-                if (mImageViews0.dx > 0)
-                    previousPage();
-                if (mImageViews0.dx < 0)
-                    nextPage();
-                if (Math.abs(mImageViews0.dy) > 0) 
-                    documents[1].movePage (mImageViews0.dy);
-
-                mImageViews0.resetDxDy();
-                return true;
-            }
-        });
-
         // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
         String[] itemsZoom = new String[]{"100", "110", "125", "150", "200", "125"};
@@ -136,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
  		        if (documents[currentDocument].mCurrentPages != null) {
-//                    documents[currentDocument].movePage (documents[currentDocument].positionPage);
                     documents[currentDocument].renderPage();
                 }
 
@@ -172,6 +111,78 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Pdf imageView
+        mImageViews = new ImageView[2];
+        mImageViews[0] = (ImageView) findViewById(R.id.imageView);
+        mImageViews[1] = (ImageView) findViewById(R.id.imageView2);
+        imageView mImageViews0 = new imageView();
+        String imageBgColor = "#E1E1E1";
+        mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                setCurrentDocument(0);
+//                Log.i("pdf2reader main mImageViews[0].setOnTouchListener currentDocument", Integer.toString(currentDocument));
+                mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
+                mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
+
+                // No document selected
+                if (documents[currentDocument].mCurrentPages == null) {return true;}
+
+                // Spinners update
+                int spinnerPosition = adapterZoom.getPosition(Integer.toString(documents[currentDocument].zoom));
+                dropdownZoom.setSelection(spinnerPosition);
+                spinnerPosition = adapterSpeed.getPosition(Float.toString(documents[currentDocument].speed));
+                dropdownSpeed.setSelection(spinnerPosition);
+
+                mImageViews0.getMotion(event);
+                if (mImageViews0.dx > 0)
+                    previousPage();
+                if (mImageViews0.dx < 0)
+                    nextPage();
+                if (Math.abs(mImageViews0.dy) > 0) {
+                    documents[0].movePage (mImageViews0.dy);
+                    if (documents[1].mCurrentPages != null)
+                        documents[1].movePage (mImageViews0.dy);
+                }
+
+                mImageViews0.resetDxDy();
+
+                return true;
+            }
+        });
+
+        mImageViews[1].setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                setCurrentDocument(1);
+//                Log.i("pdf2reader main mImageViews[1].setOnTouchListener currentDocument", Integer.toString(currentDocument));
+                mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
+                mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
+
+                // No document selected
+                if (documents[currentDocument].mCurrentPages == null) {return true;}
+
+                // Spinners update
+                int spinnerPosition = adapterZoom.getPosition(Integer.toString(documents[currentDocument].zoom));
+                dropdownZoom.setSelection(spinnerPosition);
+                spinnerPosition = adapterSpeed.getPosition(Float.toString(documents[currentDocument].speed));
+                dropdownSpeed.setSelection(spinnerPosition);
+
+                mImageViews0.getMotion(event);
+                if (mImageViews0.dx > 0)
+                    previousPage();
+                if (mImageViews0.dx < 0)
+                    nextPage();
+                if (Math.abs(mImageViews0.dy) > 0) 
+                    documents[1].movePage (mImageViews0.dy);
+
+                mImageViews0.resetDxDy();
+                return true;
+            }
+        });
+
         documents = new document[2];
         documents[0] = new document();
         documents[1] = new document();
@@ -203,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
     //                        Log.i("pdf2reader params[2] ", "++++" + params[2] + "++++");
                             documents[1].OpenFile(params[2]);
                         }
+                        TextView textPage = findViewById(R.id.textViewPage);
+                        textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

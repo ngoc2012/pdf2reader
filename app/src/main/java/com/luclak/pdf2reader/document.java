@@ -83,9 +83,10 @@ public class document {
 //        this.positionPage = Math.min(Math.max(this.positionPage - ((int) (dy*speed)), 0), (int) ( documentImageHeight - this.mImageViews.getHeight())* (int) bitWidth/this.mImageViews.getWidth());
 //
 //        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, (int) documentHeight);
-        this.positionPage = Math.min(this.positionPage - ((int) (dy*speed)), this.bitmaps.getHeight() - 100);
+        this.positionPage = Math.max(Math.min(this.positionPage - ((int) (dy*speed)), this.bitmaps.getHeight() - 100), 0);
         int hmax = (int) (this.mImageViews.getHeight() * bitWidth / this.mImageViews.getWidth());
-        Log.i("pdf2reader document movePage ", String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
+        Log.i("pdf2reader document movePage ", this.fileName + ":" + String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
+        Log.i("pdf2reader document movePage ", this.shortFileName + ":" +  this.getString());
         Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, Math.min( this.bitmaps.getHeight() - this.positionPage, hmax));
         this.mImageViews.setImageBitmap(bitmap1);
         fileIO.writeToFile(context, this.getString(),this.fileName.substring(0, this.fileName.length()-3) + "txt");
@@ -114,7 +115,6 @@ public class document {
         String folder = String.join("/", folders) + "/";
 
         this.shortFileName = fileNames[fileNames.length-1];
-        // Log.i("pdf2reader document OpenFile ", folder + ":" + filename);
 
         File file = new File(folder, this.shortFileName);
         if (!file.exists()) {
@@ -141,11 +141,12 @@ public class document {
             //this.mPdfRenderers.close();
             this.fileName = FILENAME;
 
-            Log.d("Opened ", FILENAME);
+            Log.d("pdf2reader document OpenFile Opened ", FILENAME);
 
             this.getConfig();
 
             this.currentPage = Math.min(this.numberPage-1, this.currentPage);
+            Log.i("pdf2reader document OpenFile ", this.shortFileName + ":" +  this.getString());
 
             renderPage();
         }
