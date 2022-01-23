@@ -215,18 +215,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        ImageView mImageViews1 = (ImageView) findViewById(R.id.imageView1);
-//        mImageViews1.getLayoutParams().height = 2;
-//
-//        ImageView mImageViews3 = (ImageView) findViewById(R.id.imageView3);
-//        mImageViews3.getLayoutParams().height = 2;
-//
-//        LinearLayout layout1 = (LinearLayout) findViewById(R.id.layout1);
-//        mImageViews[0].getLayoutParams().height = layout1.getHeight() - mImageViews1.getHeight();
-//
-//        LinearLayout layout2 = (LinearLayout) findViewById(R.id.layout2);
-//        mImageViews[1].getLayoutParams().height = layout2.getHeight() - mImageViews3.getHeight(); 
-
         documents = new document[2];
         documents[0] = new document();
         documents[1] = new document();
