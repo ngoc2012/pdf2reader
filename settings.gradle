@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "pdf2reader"
 include ':app'
+

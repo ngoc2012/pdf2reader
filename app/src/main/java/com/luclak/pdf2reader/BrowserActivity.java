@@ -42,9 +42,10 @@ public class BrowserActivity extends AppCompatActivity {
 
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        String[] textArray = {"One", "Two", "Three", "Four"};
         setContentView(linearLayout);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
+//        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout linearLayout0 = findViewById(R.id.linearLayout);
 
         String textBgColor = "#E1E1E1";
         for (File f : getFiles.fileList) {

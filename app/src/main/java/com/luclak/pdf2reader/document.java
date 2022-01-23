@@ -2,9 +2,13 @@ package com.luclak.pdf2reader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+//import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.ImageView;
 import java.util.Arrays;
 
@@ -26,7 +30,9 @@ public class document {
     public ParcelFileDescriptor mFileDescriptors;
     public PdfRenderer mPdfRenderers;
     public PdfRenderer.Page mCurrentPages;
+    public PdfRenderer.Page mNextPages;
     public Bitmap bitmaps;
+    public Bitmap nextBitmaps;
     public Context context;
 
     //        document(int currentPage, int numberPage, int zoom, int positionPage, float speed) {
@@ -68,6 +74,26 @@ public class document {
         }
     }
 
+    public void previousPage() {
+        currentPage = Math.max(currentPage - 1, 0);
+        positionPage = 0;
+        renderPage();
+        //TextView textPage = context.findViewById(R.id.textViewPage);
+        //textPage.setText(String.valueOf(context.documents[0].currentPage+1)+"/"+String.valueOf(context.documents[1].currentPage+1));
+
+        fileIO.writeToFile(context, getString(),fileName.substring(0, fileName.length()-3) + "txt");
+    }
+
+    public void nextPage() {
+        currentPage = Math.min(currentPage + 1, numberPage-1);
+        positionPage = 0;
+        renderPage();
+        //TextView textPage = context.findViewById(R.id.textViewPage);
+        //textPage.setText(String.valueOf(context.documents[0].currentPage+1)+"/"+String.valueOf(context.documents[1].currentPage+1));
+
+        fileIO.writeToFile(context, getString(), fileName.substring(0, fileName.length()-3) + "txt");
+    }
+
     public void movePage (float dy) {
         float bitWidth = this.bitmaps.getWidth()*100.0f/this.zoom;
         int startX = (int) (this.bitmaps.getWidth()*0.5 - (float) bitWidth*0.5);
@@ -85,12 +111,31 @@ public class document {
 //        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, (int) documentHeight);
         this.positionPage = Math.max(Math.min(this.positionPage - ((int) (dy*speed)), this.bitmaps.getHeight() - 100), 0);
         int hmax = (int) (this.mImageViews.getHeight() * bitWidth / this.mImageViews.getWidth());
-        Log.i("pdf2reader document movePage ", this.fileName + ":" + String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
-        Log.i("pdf2reader document movePage ", this.shortFileName + ":" +  this.getString());
-        Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, Math.min( this.bitmaps.getHeight() - this.positionPage, hmax));
-        this.mImageViews.setImageBitmap(bitmap1);
-        fileIO.writeToFile(context, this.getString(),this.fileName.substring(0, this.fileName.length()-3) + "txt");
+//        Log.i("pdf2reader document movePage ", this.fileName + ":" + String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
+//        Log.i("pdf2reader document movePage ", this.shortFileName + ":" +  this.getString());
+
+        if (this.positionPage > (this.bitmaps.getHeight() - this.nextBitmaps.getHeight())) {
+            nextPage();
+        } else {
+            Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, Math.min( this.bitmaps.getHeight() - this.positionPage, hmax));
+            this.mImageViews.setImageBitmap(bitmap1);
+            fileIO.writeToFile(context, this.getString(),this.fileName.substring(0, this.fileName.length()-3) + "txt");
+        }   
+    }
+
+    public static Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
+        Bitmap bmOverlay = Bitmap.createBitmap(Math.max(bmp1.getWidth(), bmp2.getWidth()), bmp1.getHeight() + bmp2.getHeight(), bmp1.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        //canvas.drawBitmap(bmp1, new Matrix(), null);
+        canvas.drawBitmap(bmp1, 0f, 0f, null);
+        canvas.drawBitmap(bmp2, 0f, bmp1.getHeight(), null);
         
+        Paint paint = new Paint();
+        canvas.drawLine(0, bmp1.getHeight(), Math.max(bmp1.getWidth(), bmp2.getWidth()), bmp1.getHeight(), paint);
+
+        bmp1.recycle();
+        bmp2.recycle();
+        return bmOverlay;
     }
 
     public void renderPage () {
@@ -98,11 +143,22 @@ public class document {
         this.mCurrentPages = this.mPdfRenderers.openPage(this.currentPage);
 //       ("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
         int factor = 4;
+        //Log.i("pdf2reader document renderPage ", String.valueOf(this.mCurrentPages.getWidth()) + " " + String.valueOf(this.mCurrentPages.getWidth()*factor));
         this.bitmaps =  Bitmap.createBitmap(this.mCurrentPages.getWidth()*factor, this.mCurrentPages.getHeight()*factor, Bitmap.Config.ARGB_8888);
+
         // The rectangle is represented by the coordinates of its 4 edges (left, top, right bottom)
         this.mCurrentPages.render(this.bitmaps, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         // close the page
         this.mCurrentPages.close();
+        
+        if (this.currentPage < (this.numberPage-1)) {
+            this.mNextPages = this.mPdfRenderers.openPage(this.currentPage + 1);
+            this.nextBitmaps =  Bitmap.createBitmap(this.mNextPages.getWidth()*factor, this.mNextPages.getHeight()*factor, Bitmap.Config.ARGB_8888);
+            this.mNextPages.render(this.nextBitmaps, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+            this.mNextPages.close();
+            this.bitmaps = overlay(this.bitmaps, this.nextBitmaps);
+        }
+
         this.movePage(0.0f);
     }
 

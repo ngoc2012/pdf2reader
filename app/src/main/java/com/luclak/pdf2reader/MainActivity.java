@@ -13,10 +13,15 @@ import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.os.Environment;
+import android.os.Build;
+import android.view.Window;
+import android.view.WindowManager;
+import android.app.ActionBar;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,14 +141,41 @@ public class MainActivity extends AppCompatActivity {
                 dropdownSpeed.setSelection(spinnerPosition);
 
                 mImageViews0.getMotion(event);
-                if (mImageViews0.dx > 0)
+                if (mImageViews0.dx > 20)
                     previousPage();
-                if (mImageViews0.dx < 0)
+                if (mImageViews0.dx < -20)
                     nextPage();
                 if (Math.abs(mImageViews0.dy) > 0) {
                     documents[0].movePage (mImageViews0.dy);
                     if (documents[1].mCurrentPages != null)
                         documents[1].movePage (mImageViews0.dy);
+                    LinearLayout linearLayout = findViewById(R.id.linearLayout);
+
+                    if (mImageViews0.dy > 0) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+//                        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                                      | View.SYSTEM_UI_FLAG_FORCE_NOT_FULLSCREEN;
+//                        decorView.setSystemUiVisibility(uiOptions);
+                    }
+                    if (mImageViews0.dy < 0) {
+                        linearLayout.setVisibility(View.GONE);
+                        if (Build.VERSION.SDK_INT < 16) {
+                            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                        } else {
+                            View decorView = getWindow().getDecorView();
+                            // Hide the status bar.
+                            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+                            decorView.setSystemUiVisibility(uiOptions);
+                            // Remember that you should never show the action bar if the
+                            // status bar is hidden, so hide that too if necessary.
+                            //ActionBar actionBar = getActionBar();
+                            //actionBar.hide();
+                            getSupportActionBar().hide();
+                        }
+                    }
                 }
 
                 mImageViews0.resetDxDy();
@@ -171,9 +203,9 @@ public class MainActivity extends AppCompatActivity {
                 dropdownSpeed.setSelection(spinnerPosition);
 
                 mImageViews0.getMotion(event);
-                if (mImageViews0.dx > 0)
+                if (mImageViews0.dx > 20)
                     previousPage();
-                if (mImageViews0.dx < 0)
+                if (mImageViews0.dx < -20)
                     nextPage();
                 if (Math.abs(mImageViews0.dy) > 0) 
                     documents[1].movePage (mImageViews0.dy);
@@ -182,6 +214,18 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+//        ImageView mImageViews1 = (ImageView) findViewById(R.id.imageView1);
+//        mImageViews1.getLayoutParams().height = 2;
+//
+//        ImageView mImageViews3 = (ImageView) findViewById(R.id.imageView3);
+//        mImageViews3.getLayoutParams().height = 2;
+//
+//        LinearLayout layout1 = (LinearLayout) findViewById(R.id.layout1);
+//        mImageViews[0].getLayoutParams().height = layout1.getHeight() - mImageViews1.getHeight();
+//
+//        LinearLayout layout2 = (LinearLayout) findViewById(R.id.layout2);
+//        mImageViews[1].getLayoutParams().height = layout2.getHeight() - mImageViews3.getHeight(); 
 
         documents = new document[2];
         documents[0] = new document();
