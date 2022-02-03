@@ -77,17 +77,17 @@ public class document {
     public void previousPage() {
         currentPage = Math.max(currentPage - 1, 0);
         positionPage = 0;
-        renderPage();
-        //TextView textPage = context.findViewById(R.id.textViewPage);
+        renderPage(0.0f);
+        //TextView textPage = findViewById(R.id.textViewPage);
         //textPage.setText(String.valueOf(context.documents[0].currentPage+1)+"/"+String.valueOf(context.documents[1].currentPage+1));
 
         fileIO.writeToFile(context, getString(),fileName.substring(0, fileName.length()-3) + "txt");
     }
 
-    public void nextPage() {
+    public void nextPage(float startPosition) {
         currentPage = Math.min(currentPage + 1, numberPage-1);
         positionPage = 0;
-        renderPage();
+        renderPage(startPosition);
         //TextView textPage = context.findViewById(R.id.textViewPage);
         //textPage.setText(String.valueOf(context.documents[0].currentPage+1)+"/"+String.valueOf(context.documents[1].currentPage+1));
 
@@ -114,8 +114,11 @@ public class document {
 //        Log.i("pdf2reader document movePage ", this.fileName + ":" + String.valueOf((int) dy) + " " + String.valueOf(this.positionPage));
 //        Log.i("pdf2reader document movePage ", this.shortFileName + ":" +  this.getString());
 
-        if (this.positionPage > (this.bitmaps.getHeight() - this.nextBitmaps.getHeight())) {
-            nextPage();
+        Log.i("pdf2reader document movePage ", String.valueOf(this.currentPage) + ":" +  String.valueOf(this.numberPage));
+        if (this.currentPage < (this.numberPage-1)) {
+            if (this.positionPage > (this.bitmaps.getHeight() - this.nextBitmaps.getHeight())) {
+                nextPage(this.positionPage - this.bitmaps.getHeight() + this.nextBitmaps.getHeight());
+            }
         } else {
             Bitmap bitmap1 = Bitmap.createBitmap(this.bitmaps, startX, this.positionPage, (int) bitWidth, Math.min( this.bitmaps.getHeight() - this.positionPage, hmax));
             this.mImageViews.setImageBitmap(bitmap1);
@@ -138,7 +141,7 @@ public class document {
         return bmOverlay;
     }
 
-    public void renderPage () {
+    public void renderPage (float startPosition) {
 
         this.mCurrentPages = this.mPdfRenderers.openPage(this.currentPage);
 //       ("mCurrentPage.getWidth() " + String.valueOf(mCurrentPage.getWidth()) + "mCurrentPage.getHeight() " + String.valueOf(mCurrentPage.getHeight()));
@@ -159,7 +162,7 @@ public class document {
             this.bitmaps = overlay(this.bitmaps, this.nextBitmaps);
         }
 
-        this.movePage(0.0f);
+        this.movePage(startPosition);
     }
 
     public void OpenFile (String FILENAME) throws IOException {
@@ -204,7 +207,7 @@ public class document {
             this.currentPage = Math.min(this.numberPage-1, this.currentPage);
             Log.i("pdf2reader document OpenFile ", this.shortFileName + ":" +  this.getString());
 
-            renderPage();
+            renderPage(0.0f);
         }
         //this.mFileDescriptors.close();
     }

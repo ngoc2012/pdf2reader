@@ -89,6 +89,22 @@
             android:layout_weight="1"
             android:background="@null" />
 
+        <Spinner
+            android:id="@+id/spinnerCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null" />
+
+        <Button
+            android:id="@+id/buttonCrop"
+            android:layout_width="26dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="onBtnCrop"
+            android:text="Crop"
+            android:textSize="10sp" />
+
         <Button
             android:id="@+id/buttonOpen"
             android:layout_width="26dp"
@@ -96,24 +112,6 @@
             android:layout_weight="1"
             android:onClick="onBtnOpen"
             android:text="Open"
-            android:textSize="10sp" />
-
-        <Button
-            android:id="@+id/buttonPrev"
-            android:layout_width="26dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="onBtnPrevClick"
-            android:text="Prev"
-            android:textSize="10sp" />
-
-        <Button
-            android:id="@+id/buttonNext"
-            android:layout_width="27dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="onBtnNextClick"
-            android:text="Next"
             android:textSize="10sp" />
 
     </LinearLayout>

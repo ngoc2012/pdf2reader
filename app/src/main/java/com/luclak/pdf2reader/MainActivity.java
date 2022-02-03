@@ -32,32 +32,35 @@ public class MainActivity extends AppCompatActivity {
     private int currentDocument;
     private int numberPage;
     private boolean notLoaded;
+    private boolean cropMode;
+    //enum side {LEFT, RIGHT, TOP, BOTTOM}
+    //private side cropSide;
 
     private void setCurrentDocument(int value) {this.currentDocument=value;}
     private int getCurrentDocument() {return this.currentDocument;}
 
     //  Vertical selection:  Alt + Shift + Insert
-    private document[] documents;
+    public document[] documents;
 
-    private void previousPage () {
-        documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
-        documents[currentDocument].positionPage = 0;
-        documents[currentDocument].renderPage();
-        TextView textPage = findViewById(R.id.textViewPage);
-        textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+    //private void previousPage () {
+    //    documents[currentDocument].currentPage = Math.max(documents[currentDocument].currentPage - numberPage,0);
+    //    documents[currentDocument].positionPage = 0;
+    //    documents[currentDocument].renderPage(0.0f);
+    //    TextView textPage = findViewById(R.id.textViewPage);
+    //    textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
-    }
+    //    fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+    //}
 
-    private void nextPage () {
-        documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
-        documents[currentDocument].positionPage = 0;
-        documents[currentDocument].renderPage();
-        TextView textPage = findViewById(R.id.textViewPage);
-        textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
+    //private void nextPage () {
+    //    documents[currentDocument].currentPage = Math.min(documents[currentDocument].currentPage + numberPage,documents[currentDocument].numberPage-1);
+    //    documents[currentDocument].positionPage = 0;
+    //    documents[currentDocument].renderPage(0.0f);
+    //    TextView textPage = findViewById(R.id.textViewPage);
+    //    textPage.setText(String.valueOf(documents[0].currentPage+1)+"/"+String.valueOf(documents[1].currentPage+1));
 
-        fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
-    }
+    //    fileIO.writeToFile(this, documents[currentDocument].getString(),documents[currentDocument].fileName.substring(0, documents[currentDocument].fileName.length()-3) + "txt");
+    //}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +74,38 @@ public class MainActivity extends AppCompatActivity {
         // Initiate
         numberPage = 1;
 
+        // Spinner - Crop
+        Spinner dropdownCrop = findViewById(R.id.spinnerCrop);
+        String[] itemsCrop = new String[]{"Left", "Right", "Top", "Bottom"};
+        ArrayAdapter<String> adapterCrop = new ArrayAdapter<>(this, R.layout.spinner_item, itemsCrop);
+        dropdownCrop.setAdapter(adapterCrop);
+	    dropdownCrop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //switch (position) {
+                //    case 0:
+                //        cropSide = side.LEFT;
+                //        break;
+                //    case 1:
+                //        cropSide = side.RIGHT;
+                //        break;
+                //    case 2:
+                //        cropSide = side.TOP;
+                //        break;
+                //    case 3:
+                //        cropSide = side.LEFT;
+                //        break;
+                //}
+ 		        //documents[currentDocument].zoom = Integer.parseInt(itemsCrop[position]);
+ 		        //if (documents[currentDocument].mCurrentPages != null) {
+                //    documents[currentDocument].renderPage(0.0f);
+                //}
+
+            }  
+ 	        @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         // Spinner - Zoom
         Spinner dropdownZoom = findViewById(R.id.spinnerZoom);
         String[] itemsZoom = new String[]{"100", "110", "125", "150", "200", "125"};
@@ -81,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
  		        documents[currentDocument].zoom = Integer.parseInt(itemsZoom[position]);
  		        if (documents[currentDocument].mCurrentPages != null) {
-                    documents[currentDocument].renderPage();
+                    documents[currentDocument].renderPage(0.0f);
                 }
 
             }  
@@ -123,11 +158,10 @@ public class MainActivity extends AppCompatActivity {
         imageView mImageViews0 = new imageView();
         String imageBgColor = "#E1E1E1";
         mImageViews[0].setOnTouchListener(new View.OnTouchListener() {
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 setCurrentDocument(0);
-//                Log.i("pdf2reader main mImageViews[0].setOnTouchListener currentDocument", Integer.toString(currentDocument));
+                //Log.i("pdf2reader main mImageViews[0].setOnTouchListener currentDocument", Integer.toString(currentDocument));
                 mImageViews[0].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[1].setBackgroundColor(Color.parseColor("#ffffff"));
 
@@ -142,10 +176,10 @@ public class MainActivity extends AppCompatActivity {
 
                 mImageViews0.getMotion(event);
                 if (mImageViews0.dx > 20)
-                    previousPage();
+                    documents[0].previousPage();
                 if (mImageViews0.dx < -20)
-                    nextPage();
-                if (Math.abs(mImageViews0.dy) > 0) {
+                    documents[0].nextPage(0.0f);
+                if (Math.abs(mImageViews0.dy) > 5) {
                     documents[0].movePage (mImageViews0.dy);
                     if (documents[1].mCurrentPages != null)
                         documents[1].movePage (mImageViews0.dy);
@@ -155,9 +189,9 @@ public class MainActivity extends AppCompatActivity {
                         linearLayout.setVisibility(View.VISIBLE);
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-//                        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                                      | View.SYSTEM_UI_FLAG_FORCE_NOT_FULLSCREEN;
-//                        decorView.setSystemUiVisibility(uiOptions);
+                        //int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        //              | View.SYSTEM_UI_FLAG_FORCE_NOT_FULLSCREEN;
+                        //decorView.setSystemUiVisibility(uiOptions);
                     }
                     if (mImageViews0.dy < 0) {
                         linearLayout.setVisibility(View.GONE);
@@ -185,11 +219,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mImageViews[1].setOnTouchListener(new View.OnTouchListener() {
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 setCurrentDocument(1);
-//                Log.i("pdf2reader main mImageViews[1].setOnTouchListener currentDocument", Integer.toString(currentDocument));
+                //Log.i("pdf2reader main mImageViews[1].setOnTouchListener currentDocument", Integer.toString(currentDocument));
                 mImageViews[1].setBackgroundColor(Color.parseColor(imageBgColor));
                 mImageViews[0].setBackgroundColor(Color.parseColor("#ffffff"));
 
@@ -204,10 +237,10 @@ public class MainActivity extends AppCompatActivity {
 
                 mImageViews0.getMotion(event);
                 if (mImageViews0.dx > 20)
-                    previousPage();
+                    documents[1].previousPage();
                 if (mImageViews0.dx < -20)
-                    nextPage();
-                if (Math.abs(mImageViews0.dy) > 0) 
+                    documents[1].nextPage(0.0f);
+                if (Math.abs(mImageViews0.dy) > 5) 
                     documents[1].movePage (mImageViews0.dy);
 
                 mImageViews0.resetDxDy();
@@ -224,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         documents[1].mImageViews = (ImageView) findViewById(R.id.imageView2);
 
         String param = fileIO.readFromFile(getApplication().getApplicationContext(), getApplicationInfo().dataDir + "/files/param.txt");
-//        Log.i("pdf2reader param ", "++++" + getApplicationInfo().dataDir + "++++");
+        //Log.i("pdf2reader param ", "++++" + getApplicationInfo().dataDir + "++++");
         Log.i("pdf2reader param ", "++++" + param + "++++");
         if (param == "")
             fileIO.writeToFile(getApplication().getApplicationContext(), "0,x,x", "param.txt");
@@ -239,11 +272,11 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         String[] params = param.split(",");
                         if (!params[1].equalsIgnoreCase("x")) {
-    //                        Log.i("pdf2reader params[1] ", "++++" + params[1] + "++++");
+                            //Log.i("pdf2reader params[1] ", "++++" + params[1] + "++++");
                             documents[0].OpenFile(params[1]);
                         }
                         if (!params[2].equalsIgnoreCase("x")) {
-    //                        Log.i("pdf2reader params[2] ", "++++" + params[2] + "++++");
+                            //Log.i("pdf2reader params[2] ", "++++" + params[2] + "++++");
                             documents[1].OpenFile(params[2]);
                         }
                         TextView textPage = findViewById(R.id.textViewPage);
@@ -261,17 +294,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-//        // Checks the orientation of the screen
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-//        }
+        // Checks the orientation of the screen
+        //if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        //} else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        //}
         Log.i("pdf2reader MainActivity onConfigurationChanged", "Something changed");
-//        if (documents[0].mCurrentPages != null) {
-//            documents[0].renderPage();
-//            movePage (0, documents[0].positionPage);
-//        }
+        //if (documents[0].mCurrentPages != null) {
+        //    documents[0].renderPage();
+        //    movePage (0, documents[0].positionPage);
+        //}
         if (documents[1].mCurrentPages != null) {
-            documents[1].renderPage();
+            documents[1].renderPage(0.0f);
         }
     }
 
@@ -283,12 +316,11 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.this.startActivity(intentMain);
     }
 
-    public void onBtnPrevClick (View view) {
-        previousPage();
-    }
-
-    public void onBtnNextClick (View view) {
-        nextPage();
+    public void onBtnCrop (View view) {
+        // 2 times crops => reset the crop value
+        if (cropMode) {
+        }
+        cropMode = true;
     }
 
 }
